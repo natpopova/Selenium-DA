@@ -1,0 +1,6 @@
+Login;FirstName;LastName;Password;Role
+user1;Ivan;Koltcof;P@ssw0rd1;DEVELOPER
+user2;Olga;Ivanova;P@ssw0rd1;USER
+user3;Petr;Nikolaev;P@ssw0rd1;DEVELOPER
+user4;Oleg;Sidorov;P@ssw0rd1;USER
+user5;Anna;Smirnova;P@ssw0rd1;USER
