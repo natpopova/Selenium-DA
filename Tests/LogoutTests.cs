@@ -1,15 +1,9 @@
-﻿using System;
-using System.Threading;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 using Selenium.Framework;
 using Selenium.Framework.Models;
 using Selenium.Pages;
 using static Selenium.Pages.BasePage;
-using SeleniumExtras.WaitHelpers;
 
 namespace Selenium.Tests
 {
@@ -23,26 +17,26 @@ namespace Selenium.Tests
             user = UserModel.GetDefaultUser();
         }
 
-
         [Test]
-        public void LogoutAfterValidLoginTest()
+        public void Logout_In_New_Tab_Invalidates_First_Tab_Session()
         {
-            HomePage homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
-            string firstTab = Driver.CurrentWindowHandle; // Сохраняем в строку идентификатор текущей вкладки - чтобы открыть её потом
-            Logger.Info("Assert user login");
-            Driver.SwitchTo().NewWindow(WindowType.Tab);    // Открыть новую вкладку
-            SiteNavigator.NavigateToHomePage(Driver).Logout(user);    // идем на HomePage и вылогиниваемся
-            Driver.Close();         // Закрываем вкладку с логаутом
-            Driver.SwitchTo().Window(firstTab);         // Переключаемся обратно на первую вкладку
-            By allLink = By.LinkText("All");
-            //var clickable = wait.Until(ExpectedConditions.ElementToBeClickable(allLink));
-            var clickable = WaitHelper.WaitForElementClickable(Driver, allLink, timeoutSeconds: 10);   // лучше код на 39 или 40 строке ???
-            clickable.Click();
+            var homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
+            WaitHelper.WaitUntil(Driver, d => homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
+
+            var firstTab = Driver.CurrentWindowHandle;
+
+            Driver.SwitchTo().NewWindow(WindowType.Tab);
+            SiteNavigator.NavigateToHomePage(Driver).Logout(user);
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/login"));
+
+            Driver.Close();
+            Driver.SwitchTo().Window(firstTab);
+
+            var allLink = WaitHelper.WaitForElementClickable(Driver, By.LinkText("All"));
+            allLink.Click();
+
             WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/login"), timeoutSeconds: 10);
-
             Assert.That(Driver.Url, Does.Contain("/login"));
-
         }
-
     }
 }

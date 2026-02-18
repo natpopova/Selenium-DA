@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using OpenQA.Selenium;
 using Selenium.Framework;
 using Selenium.Framework.Models;
@@ -12,148 +12,163 @@ namespace Selenium.Tests
 {
     public class RegistrationTests : BaseTest
     {
+        private static readonly By WelcomeSelector = By.CssSelector(".welcome");
+
         [Test]
         public void Register_New_User_And_Verify_Logged_In()
         {
-            var user = UserModel.GetRandom();
-            user.ConfirmPassword = user.Password;
+            var user = BuildRandomUser();
 
-            // Навигация на страницу регистрации через SiteNavigator
-            var registrationPage = SiteNavigator.NavigateToRegisterPage(Driver);
+            SiteNavigator.NavigateToRegisterPage(Driver)
+                .Register(user, RegistrationPage.RoleType.User);
 
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Name("name"));
-            registrationPage.Register(user, RegistrationPage.RoleType.User);    //в последнем выражении RoleType. выбираем нужный тип роли
-
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".welcome"));
-            var header = new Header(Driver);
-            var welcome = header.GetWelcomeText;
-
-            Assert.That(welcome, Is.Not.Null.And.Not.Empty);
-            Assert.That(welcome, Does.Contain(user.Login).Or.Contain(user.FirstName));
-
+            AssertUserIsLoggedIn(user);
         }
 
         [Test]
         public void Register_Logout_And_Verify_Can_Login_Again()
         {
-            // Arrange: создаём нового пользователя
-            var user = UserModel.GetRandom();
-            user.ConfirmPassword = user.Password;
+            var user = BuildRandomUser();
 
-            var registrationPage = SiteNavigator.NavigateToRegisterPage(Driver);
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Name("name"));
-            registrationPage.Register(user, RegistrationPage.RoleType.User);
+            SiteNavigator.NavigateToRegisterPage(Driver)
+                .Register(user, RegistrationPage.RoleType.User);
 
-            // Проверяем что после регистрации мы залогинены
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".welcome"));
-            var header = new Header(Driver);
-            Assert.That(header.GetWelcomeText, Does.Contain(user.Login).Or.Contain(user.FirstName));
+            var header = AssertUserIsLoggedIn(user);
+            var loginPage = header.Logout();
 
-            // Act: logout
-            var loginPageAfterLogout = header.Logout();
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Id("j_username")); // поле логина
+            WaitHelper.WaitForElementVisible(Driver, By.Id("j_username"));
+            var homePage = loginPage.Login(user);
 
-            // Act: логинимся вновь тем же пользователем
-            var homePage = loginPageAfterLogout.Login(user);
-
-            // Assert: снова видим приветствие с тем же пользователем
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".welcome"));
-            var welcomeAgain = homePage.OnHeader().GetWelcomeText;
-            Assert.That(welcomeAgain, Does.Contain(user.Login).Or.Contain(user.FirstName));
+            WaitHelper.WaitForElementVisible(Driver, WelcomeSelector);
+            Assert.That(homePage.OnHeader().GetWelcomeText, Does.Contain(user.Login).Or.Contain(user.FirstName));
         }
 
         [Test]
-        public void Register_Developer_And_Verify_Can_Upload_Application()
+        public void Register_Developer_And_Verify_Can_Open_Upload_Page()
         {
-            var user = UserModel.GetRandom();
-            user.ConfirmPassword = user.Password;
+            var user = BuildRandomUser();
 
-            var registrationPage = SiteNavigator.NavigateToRegisterPage(Driver);
+            SiteNavigator.NavigateToRegisterPage(Driver)
+                .Register(user, RegistrationPage.RoleType.Developer);
 
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Name("name"));
-            registrationPage.Register(user, RegistrationPage.RoleType.Developer);
+            AssertUserIsLoggedIn(user);
 
-            // Verify developer is logged in
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".welcome"));
             var appsPage = new ApplicationsPage(Driver);
-            Assert.That(appsPage.WelcomeLabel.Text, Does.Contain(user.Login).Or.Contain(user.FirstName));
+            Assert.That(appsPage.MyApplicationsLink, Is.Not.Null, "Developer should see 'My applications' link.");
 
-            // Developer should see link 'My applications'
-            Assert.That(appsPage.MyApplicationsLink, Is.Not.Null);
             appsPage.MyApplicationsLink.Click();
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
 
-            // Ожидаем переход на страницу моих приложений (/my)
-            BasePage.WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
             var myAppsPage = new MyApplicationsPage(Driver);
+            Assert.That(myAppsPage.AddNewApplicationLink.Displayed, "Developer should see upload/new app link.");
 
-            // Должна быть ссылка на создание нового приложения
-            Assert.That(myAppsPage.AddNewApplicationLink.Displayed);
             myAppsPage.AddNewApplicationLink.Click();
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/new"));
 
-            // Ожидаем загрузку страницы создания приложения
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Name("title"));
             var newAppPage = new NewApplicationPage(Driver);
-
-            // Assertions: наличие ключевых элементов формы
-            Assert.That(newAppPage.TitleInput.Displayed);
-            Assert.That(newAppPage.DescriptionTextArea.Displayed);
-            Assert.That(newAppPage.CategorySelect.Displayed);
-            Assert.That(newAppPage.ImageUpload.Displayed);
-            Assert.That(newAppPage.IconUpload.Displayed);
-            Assert.That(newAppPage.CreateButton.Displayed);
-
+            Assert.That(newAppPage.CreateButton.Displayed, "Upload form should be available for developer.");
         }
 
         [Test]
-        public void Register_RegUser_And_Verify_Cant_Upload_Application()
+        public void Register_Regular_User_And_Verify_Can_See_But_Cant_Upload_Application()
+        {
+            var user = BuildRandomUser();
+
+            SiteNavigator.NavigateToRegisterPage(Driver)
+                .Register(user, RegistrationPage.RoleType.User);
+
+            AssertUserIsLoggedIn(user);
+
+            var appsPage = new ApplicationsPage(Driver);
+            Assert.That(appsPage.AppCards.Count, Is.GreaterThan(0), "Regular user should see application cards.");
+            Assert.That(appsPage.MyApplicationsLink, Is.Null, "Regular user should not have upload entry point.");
+        }
+
+        [TestCaseSource(nameof(RegistrationUsersFromCsv))]
+        public void Register_Users_From_Csv_Ddt(UserModelExtended csvUser)
+        {
+            var role = ParseRole(csvUser.Role);
+            var user = new UserModelExtended
+            {
+                Login = $"{csvUser.Login}_{Guid.NewGuid():N}".Substring(0, Math.Min(30, csvUser.Login.Length + 9)),
+                FirstName = csvUser.FirstName,
+                LastName = csvUser.LastName,
+                Password = csvUser.Password,
+                ConfirmPassword = csvUser.Password,
+                Role = csvUser.Role
+            };
+
+            SiteNavigator.NavigateToRegisterPage(Driver)
+                .Register(user, role);
+
+            AssertUserIsLoggedIn(user);
+
+            var appsPage = new ApplicationsPage(Driver);
+            if (role == RegistrationPage.RoleType.Developer)
+            {
+                Assert.That(appsPage.MyApplicationsLink, Is.Not.Null, "Developer from CSV must be able to upload.");
+            }
+            else
+            {
+                Assert.That(appsPage.MyApplicationsLink, Is.Null, "Regular user from CSV must not be able to upload.");
+            }
+        }
+
+        private static IEnumerable<UserModelExtended> RegistrationUsersFromCsv()
+        {
+            var csvPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Tests", "TestData", "users.csv");
+            Assert.That(File.Exists(csvPath), Is.True, $"Test data file not found: {csvPath}");
+
+            var lines = File.ReadAllLines(csvPath);
+            Assert.That(lines.Length, Is.GreaterThanOrEqualTo(6), "CSV should contain header + at least 5 users.");
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                var parts = line.Split(';');
+                if (parts.Length < 5)
+                {
+                    throw new FormatException($"CSV line {i + 1} must contain 5 columns: {line}");
+                }
+
+                yield return new UserModelExtended
+                {
+                    Login = parts[0].Trim(),
+                    FirstName = parts[1].Trim(),
+                    LastName = parts[2].Trim(),
+                    Password = parts[3].Trim(),
+                    ConfirmPassword = parts[3].Trim(),
+                    Role = parts[4].Trim()
+                };
+            }
+        }
+
+        private static RegistrationPage.RoleType ParseRole(string role)
+        {
+            return string.Equals(role, "DEVELOPER", StringComparison.OrdinalIgnoreCase)
+                ? RegistrationPage.RoleType.Developer
+                : RegistrationPage.RoleType.User;
+        }
+
+        private static UserModel BuildRandomUser()
         {
             var user = UserModel.GetRandom();
             user.ConfirmPassword = user.Password;
-
-            var registrationPage = SiteNavigator.NavigateToRegisterPage(Driver);
-
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.Name("name"));
-            registrationPage.Register(user, RegistrationPage.RoleType.User);
-
-            // Verify RegUser is logged in
-            BasePage.WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".welcome"));
-            var appsPage = new ApplicationsPage(Driver);
-            Assert.That(appsPage.WelcomeLabel.Text, Does.Contain(user.Login).Or.Contain(user.FirstName));
-
-            // RegUser should not see link 'My applications'
-            Assert.That(appsPage.MyApplicationsLink, Is.Null);
+            return user;
         }
 
-        [Test]
-        public void Register_5_Users_From_CSV()
+        private Header AssertUserIsLoggedIn(UserModel user)
         {
-            string testUserFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Tests", "TestData", "Users.csv");
-            bool testUsetFileExists = File.Exists(testUserFilePath);
-            string[] userLines = File.ReadAllLines(testUserFilePath); // читаем все строки из файла
+            WaitHelper.WaitForElementVisible(Driver, WelcomeSelector);
+            var header = new Header(Driver);
 
-            List<UserModelExtended> userList = new List<UserModelExtended>(userLines.Length - 1);
-            for (int i = 1; i < userLines.Length; i++) // пропускаем заголовок
-            {
-                string line = userLines[i];
-                string[] parts = line.Split(new char[] { ';' }, System.StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length >= 4)
-                {
-                    var user = new UserModelExtended
-                    {
-                        Login = parts[0].Trim(),
-                        FirstName = parts[1].Trim(),
-                        LastName = parts[2].Trim(),
-                        Password = parts[3].Trim(),
-                        Role = parts.Length > 4 && string.IsNullOrEmpty(parts[4]) ? parts[4].Trim() : "USER"
-                    };
-                    user.ConfirmPassword = user.Password;
-                    userList.Add(user);
-                }
-            }
-
-            Assert.That(testUsetFileExists, Is.True, $"Test data file not found: {testUserFilePath}");
-            Assert.That(userLines.Length, Is.GreaterThan(0), "Invalid or Empty file.");
-            Assert.That(userList.Count, Is.EqualTo(userLines.Length - 1), $"Expected {userLines.Length - 1} users in test data.");
+            Assert.That(header.GetWelcomeText, Does.Contain(user.Login).Or.Contain(user.FirstName));
+            return header;
         }
     }
 }

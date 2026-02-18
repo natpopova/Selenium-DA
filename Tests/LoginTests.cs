@@ -1,9 +1,7 @@
-﻿using System;
-using System.Threading;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
-using OpenQA.Selenium.Support.UI;
-using Selenium.Framework;       
+using OpenQA.Selenium;
+using Selenium.Framework;
 using Selenium.Framework.Models;
 using Selenium.Pages;
 using static Selenium.Pages.BasePage;
@@ -12,6 +10,7 @@ namespace Selenium.Tests
 {
     public class LoginTests : BaseTest
     {
+        private const string InvalidLoginMessage = "invalid username or password";
         private UserModel user;
 
         [SetUp]
@@ -21,23 +20,26 @@ namespace Selenium.Tests
         }
 
         [Test]
-        public void ValidLoginTest()
+        public void Login_As_Valid_User()
         {
-            HomePage homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
-            Logger.Info("Assert user login");   
+            var homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
+
+            Logger.Info("Assert user login");
             WaitHelper.WaitUntil(Driver, d => homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
             ClassicAssert.True(homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
         }
 
         [Test]
-        public void InvalidLoginTest()
+        public void Login_As_Valid_User_With_Incorrect_Password()
         {
             user.Password = "invalid";
 
-            LoginPage loginPage = SiteNavigator.NavigateToLoginPage(Driver);
+            var loginPage = SiteNavigator.NavigateToLoginPage(Driver);
             loginPage.Login(user);
-            WaitHelper.WaitUntil(Driver, d => loginPage.GetFlashMessage().Contains("invalid username or password"));
-            ClassicAssert.True(loginPage.GetFlashMessage().Contains("invalid username or password"));
+
+            WaitHelper.WaitUntil(Driver, d => loginPage.GetFlashMessage().Contains(InvalidLoginMessage));
+            ClassicAssert.True(loginPage.GetFlashMessage().Contains(InvalidLoginMessage));
+            Assert.That(Driver.Url, Does.Contain("/login"));
         }
     }
 }
