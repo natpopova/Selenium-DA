@@ -1,7 +1,10 @@
+﻿using System;
 using log4net;
 using NUnit.Framework;
 using OpenQA.Selenium;
-using Selenium.Framework;
+using OpenQA.Selenium.Chrome;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace Selenium.Tests
 {
@@ -13,17 +16,38 @@ namespace Selenium.Tests
         [SetUp]
         public virtual void Init()
         {
-            this.Logger = LogManager.GetLogger(GetType());
-            this.Logger.Info("log4net initialized");
-            this.Driver = Settings.GetDriver();
-            this.Driver.Manage().Window.Maximize();
-            this.Logger.Info("Test started");
+            Logger = LogManager.GetLogger(GetType());
+            Logger.Info("log4net initialized");
+
+            // ➊ Авто-скачивание совместимого chromedriver
+            new DriverManager().SetUpDriver(new ChromeConfig());
+
+            // ➋ Опции браузера (можно дополнить при необходимости)
+            var options = new ChromeOptions();
+            options.AddArgument("--start-maximized");
+            options.AddArgument("--disable-notifications");
+            options.AddArgument("--disable-popup-blocking");
+
+            // ➌ Создание драйвера без явного пути
+            Driver = new ChromeDriver(options);
+
+            // ➍ Базовые таймауты (по желанию)
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
+
+            Logger.Info("Test started");
         }
 
         [TearDown]
         public virtual void Cleanup()
         {
-            this.Driver.Quit();
+            try
+            {
+                Driver?.Quit();
+            }
+            catch
+            {
+                Driver?.Dispose();
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ using Selenium.Pages;
 // Импортируем статический класс WaitHelper для удобного вызова ожиданий.
 using static Selenium.Pages.BasePage;
 
+
 // Пространство имён для UI-тестов проекта.
 namespace Selenium.Tests
 {
