@@ -1,10 +1,8 @@
-﻿using System;
+using System;
 using log4net;
 using NUnit.Framework;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
+using Selenium.Framework;
 
 namespace Selenium.Tests
 {
@@ -16,22 +14,14 @@ namespace Selenium.Tests
         [SetUp]
         public virtual void Init()
         {
+            // Инициализируем логгер для удобной диагностики тестов.
             Logger = LogManager.GetLogger(GetType());
             Logger.Info("log4net initialized");
 
-            // ➊ Авто-скачивание совместимого chromedriver
-            new DriverManager().SetUpDriver(new ChromeConfig());
+            // Создаём браузер через общий Settings, чтобы все тесты стартовали одинаково.
+            Driver = Settings.GetDriver();
 
-            // ➋ Опции браузера (можно дополнить при необходимости)
-            var options = new ChromeOptions();
-            options.AddArgument("--start-maximized");
-            options.AddArgument("--disable-notifications");
-            options.AddArgument("--disable-popup-blocking");
-
-            // ➌ Создание драйвера без явного пути
-            Driver = new ChromeDriver(options);
-
-            // ➍ Базовые таймауты (по желанию)
+            // Небольшой implicit wait снижает количество флак при динамических элементах.
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
 
             Logger.Info("Test started");
@@ -40,6 +30,7 @@ namespace Selenium.Tests
         [TearDown]
         public virtual void Cleanup()
         {
+            // Всегда закрываем браузер после теста, чтобы не копить процессы.
             try
             {
                 Driver?.Quit();

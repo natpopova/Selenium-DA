@@ -1,200 +1,186 @@
-// Подключаем базовые типы .NET (StringComparison и др.).
 using System;
-// Подключаем коллекции и интерфейсы коллекций.
 using System.Collections.Generic;
-// Подключаем LINQ (FirstOrDefault, Any).
 using System.Linq;
-// Подключаем Selenium API.
 using OpenQA.Selenium;
 
-// Пространство имён page-object'ов.
 namespace Selenium.Pages
 {
-    /// <summary>
-    /// Page Object для страницы каталога приложений (Home / All / категории).
-    /// </summary>
     public class ApplicationsPage : BasePage
     {
-        // Локатор блока приветствия пользователя.
-        private static readonly By _welcome = By.CssSelector(".welcome");
-        // Локатор популярных приложений.
-        private static readonly By _popularApps = By.CssSelector(".popular-container .popular-app");
-        // Локатор ссылок категорий.
-        private static readonly By _categoryLinks = By.CssSelector(".categories-ul li a");
-        // Локатор контейнера списка приложений.
-        private static readonly By _appsContainer = By.CssSelector(".apps-container");
-        // Локатор карточек приложений.
-        private static readonly By _appCards = By.CssSelector(".apps .app");
-        // Локатор названия приложения внутри карточки.
-        private static readonly By _appName = By.CssSelector(".name");
-        // Локатор описания приложения внутри карточки.
-        private static readonly By _appDescription = By.CssSelector(".description");
-        // Локатор текста скачиваний внутри карточки.
-        private static readonly By _appDownloads = By.CssSelector(".downloads");
-        // Локатор ссылки деталей приложения внутри карточки.
-        private static readonly By _appDetailsLink = By.CssSelector("a[href*='app?title=']");
-        // Локатор служебной ссылки dump в футере.
-        private static readonly By _dumpLink = By.CssSelector(".footer a[href='/dump/']");
-        // Локатор ссылки "My applications" (доступна только определённым ролям).
-        private static readonly By _myAppsLink = By.CssSelector("a[href='/my']");
-        // Локатор ссылки редактирования аккаунта.
-        private static readonly By _editAccountLink = By.CssSelector(".account a[href='/account']");
-        // Локатор ссылки Logout.
-        private static readonly By _logoutLink = By.CssSelector(".account a[href*='logout']");
+        // Локаторы основных блоков страницы.
+        private readonly By _welcome = By.CssSelector(".welcome");
+        private readonly By _popularApps = By.CssSelector(".popular-container .popular-app");
+        private readonly By _categoryLinks = By.CssSelector(".categories-ul li a");
+        private readonly By _appsContainer = By.CssSelector(".apps-container");
+        private readonly By _appCards = By.CssSelector(".apps .app");
 
-        // Конструктор Page Object; принимает IWebDriver и передаёт в базовый класс.
+        // Локаторы внутренних элементов карточки приложения.
+        private readonly By _appName = By.CssSelector(".name");
+        private readonly By _appDescription = By.CssSelector(".description");
+        private readonly By _appDownloads = By.CssSelector(".downloads");
+        private readonly By _appDetailsLink = By.CssSelector("a[href*='app?title=']");
+
+        // Локаторы ссылок меню.
+        private readonly By _dumpLink = By.CssSelector(".footer a[href='/dump/']");
+        private readonly By _myAppsLink = By.CssSelector("a[href='/my']");
+        private readonly By _editAccountLink = By.CssSelector(".account a[href='/account']");
+        private readonly By _logoutLink = By.CssSelector(".account a[href*='logout']");
+
         public ApplicationsPage(IWebDriver driver) : base(driver)
         {
-            // Ожидаем видимость ключевого контейнера, чтобы страница считалась загруженной.
+            // Ждём главный контейнер, чтобы убедиться, что страница загрузилась.
             WaitHelper.WaitForElementVisible(Driver, _appsContainer);
         }
 
-        // Свойство: элемент приветствия в шапке.
-        public IWebElement WelcomeLabel => Driver.FindElement(_welcome);
-        // Свойство: элемент ссылки Logout.
-        public IWebElement LogoutLink => Driver.FindElement(_logoutLink);
-        // Свойство: элемент ссылки Edit account.
-        public IWebElement EditAccountLink => Driver.FindElement(_editAccountLink);
-        // Свойство: элемент ссылки My applications или null, если не найден.
-        public IWebElement MyApplicationsLink => ElementIfExists(_myAppsLink);
-        // Свойство: элемент ссылки dump.
-        public IWebElement DumpLink => Driver.FindElement(_dumpLink);
+        // Элементы шапки.
+        public IWebElement WelcomeLabel { get { return Driver.FindElement(_welcome); } }
+        public IWebElement LogoutLink { get { return Driver.FindElement(_logoutLink); } }
+        public IWebElement EditAccountLink { get { return Driver.FindElement(_editAccountLink); } }
+        public IWebElement DumpLink { get { return Driver.FindElement(_dumpLink); } }
 
-        // Коллекция блоков популярных приложений.
-        public IReadOnlyCollection<IWebElement> PopularAppBlocks => Driver.FindElements(_popularApps);
-        // Коллекция ссылок категорий.
-        public IReadOnlyCollection<IWebElement> CategoryLinks => Driver.FindElements(_categoryLinks);
-        // Коллекция карточек приложений.
-        public IReadOnlyCollection<IWebElement> AppCards => Driver.FindElements(_appCards);
+        // Ссылка может отсутствовать для некоторых ролей, поэтому используем безопасный поиск.
+        public IWebElement MyApplicationsLink { get { return ElementIfExists(_myAppsLink); } }
 
-        // Лёгкая модель карточки приложения для удобного чтения данных в тестах.
+        // Коллекции элементов на странице.
+        public IReadOnlyCollection<IWebElement> PopularAppBlocks { get { return Driver.FindElements(_popularApps); } }
+        public IReadOnlyCollection<IWebElement> CategoryLinks { get { return Driver.FindElements(_categoryLinks); } }
+        public IReadOnlyCollection<IWebElement> AppCards { get { return Driver.FindElements(_appCards); } }
+
+        // Простая модель карточки для удобства в проверках.
         public class AppCard
         {
-            // Название приложения.
             public string Name { get; set; }
-            // Описание приложения.
             public string Description { get; set; }
-            // Количество скачиваний.
             public int Downloads { get; set; }
-            // Ссылка на страницу деталей.
             public IWebElement DetailsLink { get; set; }
         }
 
-        // Метод проецирует DOM-карточки в модели AppCard.
+        // Читаем все карточки и возвращаем их как список моделей.
         public IEnumerable<AppCard> GetAppCardModels()
         {
-            // Итерируемся по каждой карточке, найденной на странице.
             foreach (var card in AppCards)
             {
-                // Возвращаем модель с извлечёнными полями.
-                yield return new AppCard
-                {
-                    // Читаем и нормализуем название.
-                    Name = card.FindElement(_appName).Text.Trim(),
-                    // Читаем и нормализуем описание.
-                    Description = card.FindElement(_appDescription).Text.Trim(),
-                    // Парсим количество скачиваний из текста.
-                    Downloads = ParseDownloads(card.FindElement(_appDownloads).Text.Trim()),
-                    // Сохраняем ссылку на детали.
-                    DetailsLink = card.FindElement(_appDetailsLink)
-                };
+                var model = new AppCard();
+
+                // Читаем название.
+                model.Name = card.FindElement(_appName).Text.Trim();
+
+                // Читаем описание.
+                model.Description = card.FindElement(_appDescription).Text.Trim();
+
+                // Читаем и парсим количество скачиваний.
+                var downloadsText = card.FindElement(_appDownloads).Text.Trim();
+                model.Downloads = ParseDownloads(downloadsText);
+
+                // Сохраняем ссылку на детали.
+                model.DetailsLink = card.FindElement(_appDetailsLink);
+
+                yield return model;
             }
         }
 
-        // Переход в указанную категорию приложений по имени.
+        // Проверяем, есть ли категория с указанным названием.
+        public bool HasCategory(string categoryName)
+        {
+            return CategoryLinks.Any(link => link.Text.Trim().Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Нажимаем на категорию по её тексту.
         public void OpenCategory(string categoryName)
         {
-            // Ищем ссылку категории без учёта регистра.
-            var link = CategoryLinks.FirstOrDefault(l =>
-                string.Equals(l.Text.Trim(), categoryName, StringComparison.OrdinalIgnoreCase));
+            var categoryLink = CategoryLinks.FirstOrDefault(link => link.Text.Trim().Equals(categoryName, StringComparison.OrdinalIgnoreCase));
 
-            // Если категория не найдена — бросаем информативное исключение.
-            if (link == null)
+            if (categoryLink == null)
             {
-                throw new NoSuchElementException($"Категория '{categoryName}' не найдена.");
+                throw new NoSuchElementException("Категория '" + categoryName + "' не найдена.");
             }
 
-            // Кликаем по найденной категории.
-            link.Click();
-            // Ждём, что контейнер приложений отрисован после перехода/фильтрации.
-            WaitHelper.WaitForElementVisible(Driver, _appsContainer);
+            categoryLink.Click();
         }
 
-        // Открытие деталей приложения по имени карточки.
-        public void OpenAppDetails(string appName)
+        // Проверяем наличие приложения по имени.
+        public bool HasApplication(string appName)
         {
-            // Ищем карточку с точным совпадением названия.
-            var card = AppCards.FirstOrDefault(c => c.FindElement(_appName).Text.Trim() == appName);
-            // Если карточки нет — бросаем исключение.
-            if (card == null)
+            return AppCards.Any(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Открываем страницу деталей приложения.
+        public void OpenApplicationDetails(string appName)
+        {
+            var targetCard = AppCards.FirstOrDefault(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
+
+            if (targetCard == null)
             {
-                throw new NoSuchElementException($"Приложение '{appName}' не найдено в видимом списке.");
+                throw new NoSuchElementException("Карточка приложения '" + appName + "' не найдена.");
             }
 
-            // Кликаем ссылку деталей внутри найденной карточки.
-            card.FindElement(_appDetailsLink).Click();
+            targetCard.FindElement(_appDetailsLink).Click();
         }
 
-        // Быстрая проверка видимости приложения по имени.
-        public bool IsAppVisible(string appName)
+        // Возвращаем число скачиваний для конкретного приложения.
+        public int GetDownloadsForApp(string appName)
         {
-            // Возвращаем true, если хотя бы одна карточка с таким именем найдена.
-            return AppCards.Any(c => c.FindElement(_appName).Text.Trim() == appName);
-        }
+            var targetCard = AppCards.FirstOrDefault(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
 
-        // Получение количества скачиваний для конкретного приложения.
-        public int GetAppDownloads(string appName)
-        {
-            // Ищем карточку приложения по имени.
-            var card = AppCards.FirstOrDefault(c => c.FindElement(_appName).Text.Trim() == appName);
-            // Если карточка отсутствует — ошибка.
-            if (card == null)
+            if (targetCard == null)
             {
-                throw new NoSuchElementException($"Карточка приложения '{appName}' не найдена.");
+                throw new NoSuchElementException("Карточка приложения '" + appName + "' не найдена.");
             }
 
-            // Парсим число скачиваний из текстового блока карточки.
-            return ParseDownloads(card.FindElement(_appDownloads).Text.Trim());
+            var downloadsText = targetCard.FindElement(_appDownloads).Text.Trim();
+            return ParseDownloads(downloadsText);
         }
 
-        // Действие logout со страницы приложений.
+        // Выполняем выход из аккаунта.
         public LoginPage Logout()
         {
-            // Кликаем ссылку Logout.
             LogoutLink.Click();
-            // Возвращаем Page Object страницы логина.
             return new LoginPage(Driver);
         }
 
-        // Переход на страницу "My applications".
+        // Открываем раздел "My applications".
         public MyApplicationsPage OpenMyApplications()
         {
-            // Берём ссылку, если есть, иначе бросаем исключение.
-            var link = MyApplicationsLink ?? throw new NoSuchElementException("Ссылка 'My applications' отсутствует.");
-            // Кликаем по ссылке.
+            var link = MyApplicationsLink;
+
+            if (link == null)
+            {
+                throw new NoSuchElementException("Ссылка 'My applications' отсутствует.");
+            }
+
             link.Click();
-            // Ждём URL целевой страницы.
             WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
-            // Возвращаем Page Object страницы "My applications".
             return new MyApplicationsPage(Driver);
         }
 
-        // Вспомогательный парсер текста формата "# of downloads: N".
+        // Преобразуем текст формата "# of downloads: 10" в число 10.
         private int ParseDownloads(string text)
         {
-            // Делим строку по ':'.
             var parts = text.Split(':');
-            // Если формат корректный и число распарсилось — возвращаем число, иначе 0.
-            return parts.Length == 2 && int.TryParse(parts[1].Trim(), out var downloads) ? downloads : 0;
+
+            if (parts.Length == 2)
+            {
+                int number;
+                if (int.TryParse(parts[1].Trim(), out number))
+                {
+                    return number;
+                }
+            }
+
+            return 0;
         }
 
-        // Вспомогательный безопасный поиск элемента: возвращает null вместо исключения.
+        // Безопасно ищем элемент: если не найден, возвращаем null.
         private IWebElement ElementIfExists(By by)
         {
-            // Получаем все совпавшие элементы.
             var elements = Driver.FindElements(by);
-            // Если что-то найдено — возвращаем первый элемент, иначе null.
-            return elements.Count > 0 ? elements[0] : null;
+
+            if (elements.Count > 0)
+            {
+                return elements[0];
+            }
+
+            return null;
         }
     }
 }
