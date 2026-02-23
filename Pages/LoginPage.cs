@@ -1,4 +1,3 @@
-using System;
 using OpenQA.Selenium;
 using Selenium.Framework.Models;
 
@@ -6,29 +5,53 @@ namespace Selenium.Pages
 {
     public class LoginPage : BasePage
     {
+        // Локаторы элементов формы логина.
+        private readonly By _usernameBox = By.Id("j_username");
+        private readonly By _passwordBox = By.Id("j_password");
+        private readonly By _loginButton = By.XPath("//input[@value='Login']");
+        private readonly By _registerLink = By.PartialLinkText("Register");
+
         public LoginPage(IWebDriver driver) : base(driver)
         {
         }
 
-        public IWebElement UsernameBox => Driver.FindElement(By.Id("j_username"));
-        public IWebElement PasswordBox => Driver.FindElement(By.Id("j_password"));
-        public IWebElement LoginButton => Driver.FindElement(By.XPath("//input[@value='Login']"));
-        public IWebElement RegisterLink => Driver.FindElement(By.PartialLinkText("Register"));
-
-        #region Methods
-
-        public HomePage Login(UserModel user)
+        // Элемент поля логина.
+        public IWebElement UsernameBox
         {
-            UsernameBox.SendKeys(user.Login);
-            PasswordBox.SendKeys(user.Password);
-            LoginButton.Click();
-            return new HomePage(Driver);
+            get { return Driver.FindElement(_usernameBox); }
         }
 
-        //internal HomePage Login(User user)
-        //{
-        //    throw new NotImplementedException();
-        //}
-        #endregion
+        // Элемент поля пароля.
+        public IWebElement PasswordBox
+        {
+            get { return Driver.FindElement(_passwordBox); }
+        }
+
+        // Кнопка входа.
+        public IWebElement LoginButton
+        {
+            get { return Driver.FindElement(_loginButton); }
+        }
+
+        // Ссылка на регистрацию.
+        public IWebElement RegisterLink
+        {
+            get { return Driver.FindElement(_registerLink); }
+        }
+
+        // Выполняем вход под пользователем и возвращаем домашнюю страницу.
+        public HomePage Login(UserModel user)
+        {
+            // Заполняем поле логина.
+            UsernameBox.SendKeys(user.Login);
+
+            // Заполняем поле пароля.
+            PasswordBox.SendKeys(user.Password);
+
+            // Нажимаем кнопку входа.
+            LoginButton.Click();
+
+            return new HomePage(Driver);
+        }
     }
 }
