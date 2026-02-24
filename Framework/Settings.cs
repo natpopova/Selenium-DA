@@ -1,5 +1,6 @@
 using System;
 using System.Configuration;
+using System.IO;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using WebDriverManager;
