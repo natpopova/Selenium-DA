@@ -1,52 +1,87 @@
-﻿using System;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
 
 namespace Selenium.Pages
 {
-    public class Header : BasePage  // Header - часть страницы и её наследник
+    public class Header : BasePage
     {
+        // Локаторы элементов шапки сайта.
+        private readonly By _welcomeLabel = By.CssSelector(".welcome");
+        private readonly By _title = By.CssSelector(".header .title");
+        private readonly By _navAjax = By.LinkText("Ajax test page");
+        private readonly By _navJs = By.LinkText("JS test page");
+        private readonly By _navMyApplications = By.LinkText("My applications");
+        private readonly By _editAccount = By.LinkText("Edit account");
+        private readonly By _homeLink = By.LinkText("Home");
+        private readonly By _logOutLink = By.LinkText("Logout");
+
         public Header(IWebDriver driver) : base(driver)
         {
         }
 
-        public IWebElement WelcomeLabel => Driver.FindElement(By.CssSelector(".welcome"));
-        public IWebElement Title => Driver.FindElement(By.CssSelector(".header .title"));
-        public IWebElement NavAjax => Driver.FindElement(By.LinkText("Ajax test page"));
-        public IWebElement NavJs => Driver.FindElement(By.LinkText("JS test page"));
-        public IWebElement NavMyApplications => Driver.FindElement(By.LinkText("My applications"));
-        public IWebElement EditAccount => Driver.FindElement(By.LinkText("Edit account"));
-        public IWebElement HomeLink => Driver.FindElement(By.LinkText("Home"));
-        public IWebElement LogOutLink => Driver.FindElement(By.LinkText("Logout"));
+        // Элементы шапки.
+        public IWebElement WelcomeLabel { get { return Driver.FindElement(_welcomeLabel); } }
+        public IWebElement Title { get { return Driver.FindElement(_title); } }
+        public IWebElement NavAjax { get { return Driver.FindElement(_navAjax); } }
+        public IWebElement NavJs { get { return Driver.FindElement(_navJs); } }
+        public IWebElement NavMyApplications { get { return Driver.FindElement(_navMyApplications); } }
+        public IWebElement EditAccount { get { return Driver.FindElement(_editAccount); } }
+        public IWebElement HomeLink { get { return Driver.FindElement(_homeLink); } }
+        public IWebElement LogOutLink { get { return Driver.FindElement(_logOutLink); } }
 
-        #region Methods
+        // Читаем приветствие пользователя.
+        public string GetWelcomeText
+        {
+            get { return WelcomeLabel.Text; }
+        }
 
-        public string GetWelcomeText => WelcomeLabel.Text;
-        public string GetTitleText => Title.Text;
+        // Читаем заголовок в шапке.
+        public string GetTitleText
+        {
+            get { return Title.Text; }
+        }
 
+        // Выходим из аккаунта и возвращаем страницу входа.
         public LoginPage Logout()
         {
             LogOutLink.Click();
             return new LoginPage(Driver);
         }
-        #endregion
 
-        //  Методы навигации  (по элементам хэдэра) 
-
+        // Переходим в раздел "My applications".
         public MyApplicationsPage GoToMyApplications()
         {
             NavMyApplications.Click();
             return new MyApplicationsPage(Driver);
         }
 
-        public void GoToAjaxPage() => NavAjax.Click();
-        public void GoToJsPage() => NavJs.Click();
-        public void GoToHomePage() => HomeLink.Click();
-        public void EditUserAccount() => EditAccount.Click();
-        public void LogoutUser() => LogOutLink.Click();
+        // Переходим на страницу Ajax теста.
+        public void GoToAjaxPage()
+        {
+            NavAjax.Click();
+        }
 
+        // Переходим на страницу JavaScript теста.
+        public void GoToJsPage()
+        {
+            NavJs.Click();
+        }
 
+        // Переходим на главную.
+        public void GoToHomePage()
+        {
+            HomeLink.Click();
+        }
+
+        // Открываем редактирование аккаунта.
+        public void EditUserAccount()
+        {
+            EditAccount.Click();
+        }
+
+        // Альтернативный метод выхода без возврата нового объекта.
+        public void LogoutUser()
+        {
+            LogOutLink.Click();
+        }
     }
-
-
 }
