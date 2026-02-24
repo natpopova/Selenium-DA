@@ -3,6 +3,8 @@ using System.Configuration;
 using System.IO;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace Selenium.Framework
 {
@@ -27,8 +29,10 @@ namespace Selenium.Framework
 
             if (string.Equals(browserType, "chrome", StringComparison.OrdinalIgnoreCase))
             {
-                // Берём драйвер из папки Drivers, которая копируется в output.
-                var driversPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Drivers");
+                // Важно: скачиваем совместимый chromedriver под установленную версию Chrome.
+                // Это устраняет ошибку вида:
+                // "This version of ChromeDriver only supports Chrome version X; Current browser version is Y".
+                new DriverManager().SetUpDriver(new ChromeConfig());
 
                 // Базовые опции для стабильного запуска автотестов.
                 var options = new ChromeOptions();
@@ -36,7 +40,9 @@ namespace Selenium.Framework
                 options.AddArgument("--disable-notifications");
                 options.AddArgument("--disable-popup-blocking");
 
-                return new ChromeDriver(driversPath, options);
+                // Не указываем путь к фиксированному драйверу из папки Drivers,
+                // чтобы использовать актуальный драйвер, установленный WebDriverManager.
+                return new ChromeDriver(options);
             }
 
             throw new Exception("Unknown browser type: " + browserType);
