@@ -34,22 +34,23 @@ namespace Selenium.Pages
             Wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
         }
 
-        // Свойства элементов карточки.
-        public IWebElement AppImage { get { return Driver.FindElement(_appImage); } }
-        public IWebElement AppName { get { return Driver.FindElement(_appName); } }
-        public IWebElement Description { get { return Driver.FindElement(_description); } }
-        public IWebElement Category { get { return Driver.FindElement(_category); } }
-        public IWebElement Author { get { return Driver.FindElement(_author); } }
-        public IWebElement Downloads { get { return Driver.FindElement(_downloads); } }
+        // Свойства элементов карточки. Чтение состояния, "дай элемент". не кешируется, чтобы всегда работать с актуальными данными.
+
+        public IWebElement AppImage => Driver.FindElement(_appImage);
+        public IWebElement AppName => Driver.FindElement(_appName);
+        public IWebElement Description => Driver.FindElement(_description);
+        public IWebElement Category => Driver.FindElement(_category);
+        public IWebElement Author => Driver.FindElement(_author);
+        public IWebElement Downloads => Driver.FindElement(_downloads);
 
         // Свойства кнопок действий.
-        public IWebElement DownloadButton { get { return Driver.FindElement(_downloadButton); } }
-        public IWebElement DeleteButton { get { return Driver.FindElement(_deleteButton); } }
-        public IWebElement EditButton { get { return Driver.FindElement(_editButton); } }
+        public IWebElement DownloadButton => Driver.FindElement(_downloadButton);
+        public IWebElement DeleteButton => Driver.FindElement(_deleteButton);
+        public IWebElement EditButton => Driver.FindElement(_editButton);
 
         // Свойства формы рейтинга.
-        public IWebElement RateDropdown { get { return Driver.FindElement(_rateDropdown); } }
-        public IWebElement SaveButton { get { return Driver.FindElement(_saveButton); } }
+        public IWebElement RateDropdown => Driver.FindElement(_rateDropdown);
+        public IWebElement SaveButton => Driver.FindElement(_saveButton);
 
         // Скачиваем приложение.
         public void Download()

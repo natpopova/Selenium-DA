@@ -16,28 +16,17 @@ namespace Selenium.Pages
         }
 
         // Элемент поля логина.
-        public IWebElement UsernameBox
-        {
-            get { return Driver.FindElement(_usernameBox); }
-        }
+        public IWebElement UsernameBox => Driver.FindElement(_usernameBox);
 
         // Элемент поля пароля.
-        public IWebElement PasswordBox
-        {
-            get { return Driver.FindElement(_passwordBox); }
-        }
+        public IWebElement PasswordBox => Driver.FindElement(_passwordBox);
 
         // Кнопка входа.
-        public IWebElement LoginButton
-        {
-            get { return Driver.FindElement(_loginButton); }
-        }
+        public IWebElement LoginButton => Driver.FindElement(_loginButton);
 
         // Ссылка на регистрацию.
-        public IWebElement RegisterLink
-        {
-            get { return Driver.FindElement(_registerLink); }
-        }
+        public IWebElement RegisterLink => Driver.FindElement(_registerLink);
+
 
         // Выполняем вход под пользователем и возвращаем домашнюю страницу.
         public HomePage Login(UserModel user)

@@ -19,13 +19,13 @@ namespace Selenium.Pages
         }
 
         // Элементы формы.
-        public IWebElement Header { get { return Driver.FindElement(_header); } }
-        public IWebElement TitleInput { get { return Driver.FindElement(_titleInput); } }
-        public IWebElement DescriptionTextArea { get { return Driver.FindElement(_descriptionTextArea); } }
-        public IWebElement CategorySelect { get { return Driver.FindElement(_categorySelect); } }
-        public IWebElement ImageUpload { get { return Driver.FindElement(_imageUpload); } }
-        public IWebElement IconUpload { get { return Driver.FindElement(_iconUpload); } }
-        public IWebElement CreateButton { get { return Driver.FindElement(_createButton); } }
+        public IWebElement Header => Driver.FindElement(_header);
+        public IWebElement TitleInput => Driver.FindElement(_titleInput);
+        public IWebElement DescriptionTextArea => Driver.FindElement(_descriptionTextArea);
+        public IWebElement CategorySelect => Driver.FindElement(_categorySelect);
+        public IWebElement ImageUpload => Driver.FindElement(_imageUpload);
+        public IWebElement IconUpload => Driver.FindElement(_iconUpload);
+        public IWebElement CreateButton => Driver.FindElement(_createButton);
 
         // Вводим название приложения.
         public void EnterTitle(string title)

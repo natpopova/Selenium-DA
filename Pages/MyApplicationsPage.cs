@@ -12,10 +12,7 @@ namespace Selenium.Pages
         }
 
         // Возвращаем ссылку "Add new application".
-        public IWebElement AddNewApplicationLink
-        {
-            get { return Driver.FindElement(_addNewApplicationLink); }
-        }
+        public IWebElement AddNewApplicationLink => Driver.FindElement(_addNewApplicationLink);
 
         // Открываем форму создания нового приложения.
         public NewApplicationPage OpenNewApplicationForm()

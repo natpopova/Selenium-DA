@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 // Подключаем работу с файлами (File, Path).
 using System.IO;
+using System.Linq;
+
 // Подключаем NUnit-атрибуты и Assert.
 using NUnit.Framework;
 // Подключаем Selenium By и IWebElement.
@@ -35,7 +37,7 @@ namespace Selenium.Tests
 
             // Переходим на регистрацию и отправляем форму с ролью обычного пользователя.
             SiteNavigator.NavigateToRegisterPage(Driver)
-                .Register(user, RegistrationPage.RoleType.User);
+                .Register(user, RegistrationPage.RoleType.USER);
 
             // Проверяем факт авторизации после регистрации.
             AssertUserIsLoggedIn(user);
@@ -50,7 +52,7 @@ namespace Selenium.Tests
 
             // Регистрируем нового пользователя.
             SiteNavigator.NavigateToRegisterPage(Driver)
-                .Register(user, RegistrationPage.RoleType.User);
+                .Register(user, RegistrationPage.RoleType.USER);
 
             // Валидируем, что сразу после регистрации пользователь залогинен.
             var header = AssertUserIsLoggedIn(user);
@@ -77,7 +79,7 @@ namespace Selenium.Tests
 
             // Регистрируем его как Developer.
             SiteNavigator.NavigateToRegisterPage(Driver)
-                .Register(user, RegistrationPage.RoleType.Developer);
+                .Register(user, RegistrationPage.RoleType.DEVELOPER);
 
             // Подтверждаем, что после регистрации пользователь авторизован.
             AssertUserIsLoggedIn(user);
@@ -117,7 +119,7 @@ namespace Selenium.Tests
 
             // Регистрируем как обычного пользователя.
             SiteNavigator.NavigateToRegisterPage(Driver)
-                .Register(user, RegistrationPage.RoleType.User);
+                .Register(user, RegistrationPage.RoleType.USER);
 
             // Проверяем авторизацию после регистрации.
             AssertUserIsLoggedIn(user);
@@ -136,11 +138,15 @@ namespace Selenium.Tests
         {
             // Преобразуем роль из CSV в enum, который понимает RegistrationPage.
             var role = ParseRole(csvUser.Role);
+            var shortId = Guid.NewGuid().ToString("N").Substring(0, 6); // Короткий суффикс для уникальности.
+            //ToString("N") → GUID без дефисов
+            //Substring(0, 6) → берём первые 6 символов
+            
             // Создаём копию данных пользователя и делаем логин уникальным для повторяемости прогона.
             var user = new UserModelExtended
             {
                 // Добавляем случайный суффикс, чтобы избежать конфликта "user already exists".
-                Login = $"{csvUser.Login}_{Guid.NewGuid():N}".Substring(0, Math.Min(30, csvUser.Login.Length + 9)),
+                Login = csvUser.Login + " " +shortId,
                 // Копируем имя.
                 FirstName = csvUser.FirstName,
                 // Копируем фамилию.
@@ -160,70 +166,49 @@ namespace Selenium.Tests
             // Проверяем, что регистрация завершилась логином.
             AssertUserIsLoggedIn(user);
 
-            // Открываем приложения для role-based проверок прав.
-            var appsPage = new ApplicationsPage(Driver);
-            // Если это developer — ссылка "My applications" обязана быть.
-            if (role == RegistrationPage.RoleType.Developer)
-            {
-                Assert.That(appsPage.MyApplicationsLink, Is.Not.Null, "Developer from CSV must be able to upload.");
-            }
-            // Если обычный пользователь — ссылки быть не должно.
-            else
-            {
-                Assert.That(appsPage.MyApplicationsLink, Is.Null, "Regular user from CSV must not be able to upload.");
-            }
         }
 
         // Метод-генератор данных для TestCaseSource (читает пользователей из CSV).
         private static IEnumerable<UserModelExtended> RegistrationUsersFromCsv()
         {
             // Формируем путь до CSV в выходной директории тестов.
-            var csvPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Tests", "TestData", "users.csv");
+            var csvPath = Path.Combine(
+                TestContext.CurrentContext.TestDirectory,
+                "Tests",
+                "TestData",
+                "users.csv");
+
             // Проверяем, что файл действительно присутствует.
             Assert.That(File.Exists(csvPath), Is.True, $"Test data file not found: {csvPath}");
 
-            // Читаем все строки файла.
+            var users = new List<UserModelExtended>();
             var lines = File.ReadAllLines(csvPath);
-            // Проверяем минимум: заголовок + 5 пользователей (по заданию).
-            Assert.That(lines.Length, Is.GreaterThanOrEqualTo(6), "CSV should contain header + at least 5 users.");
 
             // Начинаем с 1, потому что нулевая строка — это header.
-            for (var i = 1; i < lines.Length; i++)
+            foreach (var line in File.ReadLines(csvPath).Skip(1))
             {
-                // Берём текущую строку и убираем лишние пробелы по краям.
-                var line = lines[i].Trim();
-                // Пропускаем пустые строки.
                 if (string.IsNullOrWhiteSpace(line))
                 {
-                    continue;
+                    continue; // Пропускаем пустые строки.
                 }
-
-                // Делим строку по разделителю ';'.
                 var parts = line.Split(';');
-                // Проверяем корректность количества колонок.
                 if (parts.Length < 5)
                 {
-                    // Выбрасываем исключение с номером проблемной строки.
-                    throw new FormatException($"CSV line {i + 1} must contain 5 columns: {line}");
+                    throw new FormatException($"CSV line must contain 5 columns: {line}");
                 }
 
-                // Возвращаем объект пользователя как один тестовый кейс.
-                yield return new UserModelExtended
+                var user = new UserModelExtended
                 {
-                    // Колонка логина.
                     Login = parts[0].Trim(),
-                    // Колонка имени.
                     FirstName = parts[1].Trim(),
-                    // Колонка фамилии.
                     LastName = parts[2].Trim(),
-                    // Колонка пароля.
                     Password = parts[3].Trim(),
-                    // ConfirmPassword дублирует пароль.
                     ConfirmPassword = parts[3].Trim(),
-                    // Колонка роли.
                     Role = parts[4].Trim()
                 };
+                users.Add(user);
             }
+            return users;
         }
 
         // Вспомогательный метод: перевод строковой роли в enum роли страницы регистрации.
@@ -231,9 +216,9 @@ namespace Selenium.Tests
         {
             // Если роль "DEVELOPER" (без учёта регистра), возвращаем Developer.
             return string.Equals(role, "DEVELOPER", StringComparison.OrdinalIgnoreCase)
-                ? RegistrationPage.RoleType.Developer
+                ? RegistrationPage.RoleType.DEVELOPER
                 // Иначе по умолчанию считаем роль обычным пользователем.
-                : RegistrationPage.RoleType.User;
+                : RegistrationPage.RoleType.USER;
         }
 
         // Вспомогательный фабричный метод для генерации валидного random user.

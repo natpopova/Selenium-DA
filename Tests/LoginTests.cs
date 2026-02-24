@@ -14,6 +14,7 @@ using Selenium.Pages;
 using static Selenium.Pages.BasePage;
 
 
+
 // Пространство имён для UI-тестов проекта.
 namespace Selenium.Tests
 {
@@ -30,22 +31,24 @@ namespace Selenium.Tests
         protected void Initialize()
         {
             // Берём дефолтного валидного пользователя (admin/admin).
+            //Вызываем статический метод GetDefaultUser() класса UserModel, который создаёт и возвращает экземпляр пользователя с дефолтными данными.
             user = UserModel.GetDefaultUser();
         }
 
         // Тест: вход валидным пользователем.
-        [Test]
-        public void Login_As_Valid_User()
+        [Test] //Это NUnit-атрибут, который помечает метод как тестовый кейс для выполнения тест-раннером.
+        
+        public void Login_As_Valid_User() //Публичный метод без возвращаемого значения, представляющий тест-сценарий “логин валидным пользователем”.
         {
             // Переходим на страницу логина и выполняем вход, получая объект домашней страницы.
             var homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
 
-            // Пишем диагностическое сообщение в лог.
+            // Пишем инф сообщение в лог.
             Logger.Info("Assert user login");
-            // Ждём, пока в приветствии появится имя пользователя.
+            // Ждём, пока в приветствии появится имя пользователя. вспомогательный метод
             WaitHelper.WaitUntil(Driver, d => homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
             // Проверяем, что приветствие действительно содержит имя.
-            ClassicAssert.True(homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
+            Assert.That(homePage.OnHeader().GetWelcomeText, Does.Contain(user.FirstName));
         }
 
         // Тест: валидный логин + неправильный пароль.
@@ -63,7 +66,7 @@ namespace Selenium.Tests
             // Ждём появления flash-сообщения об ошибке авторизации.
             WaitHelper.WaitUntil(Driver, d => loginPage.GetFlashMessage().Contains(InvalidLoginMessage));
             // Проверяем текст сообщения об ошибке.
-            ClassicAssert.True(loginPage.GetFlashMessage().Contains(InvalidLoginMessage));
+            Assert.That(loginPage.GetFlashMessage(), Does.Contain(InvalidLoginMessage), "invalid username or password");
             // Проверяем, что мы остались на странице логина.
             Assert.That(Driver.Url, Does.Contain("/login"));
         }

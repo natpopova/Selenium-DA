@@ -63,12 +63,12 @@ namespace Selenium.Pages
 
         public enum RoleType
         {
-            User,
-            Developer
+            USER,
+            DEVELOPER
         }
 
         // Заполняем форму регистрации и отправляем её.
-        public LoginPage Register(UserModel user, RoleType roleType = RoleType.User)
+        public LoginPage Register(UserModel user, RoleType roleType = RoleType.USER)
         {
             // Вводим логин.
             NameBox.Clear();
@@ -92,7 +92,7 @@ namespace Selenium.Pages
 
             // Выбираем роль пользователя в выпадающем списке.
             var roleSelect = new SelectElement(RoleDropdown);
-            roleSelect.SelectByText(roleType == RoleType.Developer ? "Developer" : "User");
+            roleSelect.SelectByText(roleType == RoleType.DEVELOPER ? "DEVELOPER" : "USER");
 
             // Отправляем форму.
             RegisterButton.Click();

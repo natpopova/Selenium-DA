@@ -14,16 +14,11 @@ namespace Selenium.Pages
         }
 
         // Получаем ссылку Logout.
-        public IWebElement LogoutLink
-        {
-            get { return Driver.FindElement(_logoutLink); }
-        }
+        public IWebElement LogoutLink => Driver.FindElement(_logoutLink);
 
         // Получаем ссылку All.
-        public IWebElement AllLink
-        {
-            get { return Driver.FindElement(_allLink); }
-        }
+        public IWebElement AllLink => Driver.FindElement(_allLink);
+
 
         // Выходим из аккаунта и возвращаем страницу логина.
         public LoginPage Logout(UserModel user)

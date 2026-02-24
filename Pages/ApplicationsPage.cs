@@ -32,19 +32,19 @@ namespace Selenium.Pages
             WaitHelper.WaitForElementVisible(Driver, _appsContainer);
         }
 
-        // Элементы шапки.
-        public IWebElement WelcomeLabel { get { return Driver.FindElement(_welcome); } }
-        public IWebElement LogoutLink { get { return Driver.FindElement(_logoutLink); } }
-        public IWebElement EditAccountLink { get { return Driver.FindElement(_editAccountLink); } }
-        public IWebElement DumpLink { get { return Driver.FindElement(_dumpLink); } }
+        // Веб-элементы как свойства. Это жёсткий поиск, который будет выбрасывать исключение, если элемент не найден. Это нормально для основных элементов страницы.
+        public IWebElement WelcomeLabel => Driver.FindElement(_welcome);
+        public IWebElement LogoutLink => Driver.FindElement(_logoutLink);
+        public IWebElement EditAccountLink => Driver.FindElement(_editAccountLink);
+        public IWebElement DumpLink => Driver.FindElement(_dumpLink);
 
         // Ссылка может отсутствовать для некоторых ролей, поэтому используем безопасный поиск.
-        public IWebElement MyApplicationsLink { get { return ElementIfExists(_myAppsLink); } }
+        public IWebElement MyApplicationsLink => ElementIfExists(_myAppsLink);
 
-        // Коллекции элементов на странице.
-        public IReadOnlyCollection<IWebElement> PopularAppBlocks { get { return Driver.FindElements(_popularApps); } }
-        public IReadOnlyCollection<IWebElement> CategoryLinks { get { return Driver.FindElements(_categoryLinks); } }
-        public IReadOnlyCollection<IWebElement> AppCards { get { return Driver.FindElements(_appCards); } }
+        // Коллекции элементов на странице. Это мягкий поиск, который вернёт пустой список, если элементы не найдены. Это удобно для блоков, которые могут быть динамическими.
+        public IReadOnlyCollection<IWebElement> PopularAppBlocks => Driver.FindElements(_popularApps);
+        public IReadOnlyCollection<IWebElement> CategoryLinks => Driver.FindElements(_categoryLinks);
+        public IReadOnlyCollection<IWebElement> AppCards => Driver.FindElements(_appCards);
 
         // Простая модель карточки для удобства в проверках.
         public class AppCard
@@ -56,28 +56,35 @@ namespace Selenium.Pages
         }
 
         // Читаем все карточки и возвращаем их как список моделей.
-        public IEnumerable<AppCard> GetAppCardModels()
+        public List<AppCard> GetAppCardModels()
         {
+            var models = new List<AppCard>(); //создаем список для хранения моделей
+
             foreach (var card in AppCards)
             {
-                var model = new AppCard();
+                var model = new AppCard
+                {
+                    // Читаем название
+                    Name = card.FindElement(_appName).Text.Trim(),
 
-                // Читаем название.
-                model.Name = card.FindElement(_appName).Text.Trim();
+                    // Читаем описание
+                    Description = card.FindElement(_appDescription).Text.Trim(),
 
-                // Читаем описание.
-                model.Description = card.FindElement(_appDescription).Text.Trim();
+                    // Читаем и парсим количество скачиваний
+                    Downloads = ParseDownloads(
+                        card.FindElement(_appDownloads).Text.Trim()
+                    ),
 
-                // Читаем и парсим количество скачиваний.
-                var downloadsText = card.FindElement(_appDownloads).Text.Trim();
-                model.Downloads = ParseDownloads(downloadsText);
+                    // Сохраняем ссылку на детали
+                    DetailsLink = card.FindElement(_appDetailsLink)
+                };
 
-                // Сохраняем ссылку на детали.
-                model.DetailsLink = card.FindElement(_appDetailsLink);
-
-                yield return model;
+                models.Add(model);
             }
+
+            return models;
         }
+
 
         // Проверяем, есть ли категория с указанным названием.
         public bool HasCategory(string categoryName)

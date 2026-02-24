@@ -28,7 +28,7 @@ namespace Selenium.Pages
         public IWebElement HomeLink { get { return Driver.FindElement(_homeLink); } }
         public IWebElement LogOutLink { get { return Driver.FindElement(_logOutLink); } }
 
-        // Читаем приветствие пользователя.
+        // Свойство. Читаем приветствие пользователя.
         public string GetWelcomeText
         {
             get { return WelcomeLabel.Text; }
