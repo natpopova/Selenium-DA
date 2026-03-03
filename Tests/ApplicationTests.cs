@@ -40,7 +40,6 @@ namespace Selenium.Tests
         [Test]
         public void Download_Should_Open_Json_With_Data_Equal_To_Details_Page()
         {
-            //OpenAllAppsPage();
             OpenFirstAppDetails();
 
             var card = new ApplicationCard(Driver);
@@ -67,6 +66,46 @@ namespace Selenium.Tests
 
         }
 
+        [Test]
+        public void Create_New_App_Without_Images()
+        //Create a new application without images. Verify that it is displayed correctly and can be downloaded.
+        {  
+            var title = "New Test App " + Guid.NewGuid(); //генерируем уникальное имя для приложения, чтобы не было конфликтов при повторных запусках теста
+            var description = "New app without images";
+            var category = "Information";
+
+            var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
+
+            WaitHelper.WaitForElementVisible(Driver, By.Name("title"));
+            newApplicationPage.EnterTitle(title);
+            newApplicationPage.EnterDescription(description);
+            newApplicationPage.SelectCategory(category);
+            newApplicationPage.ClickCreateButton();
+
+            //ждём перенаправления на страницу NavigateToMyApplicationsPage после создания приложения
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
+            //на странице сортировка в алфавитном порядке, нужно найти по заголовку title
+            var appLink = WaitHelper.WaitForElementClickable(Driver, By.XPath($"//a[normalize-space()='{title}']"));
+            //провалиться в детали и проверить заголовок, описание, категорию и загрузку
+            appLink.Click();
+
+            var card = new ApplicationCard(Driver);
+            Assert.That(card.GetAppName(), Is.EqualTo(title));
+            Assert.That(GetTextAfterColon(card.GetDescription()), Is.EqualTo(description));
+            Assert.That(GetTextAfterColon(card.GetCategory()), Is.EqualTo(category));
+
+            card.Download();
+
+            var json = GetJsonFromCurrentPage();
+            Assert.That(GetString(json, "title"), Is.EqualTo(title));
+            Assert.That(GetString(json, "description"), Is.EqualTo(description));
+            Assert.That(GetString(json, "category", "title"), Is.EqualTo(category));
+            Assert.That(json.GetProperty("imageData").ValueKind, Is.EqualTo(JsonValueKind.Null)); //проверяем, что в JSON нет данных об изображении, так как мы не добавляли изображения при создании приложения
+            Assert.That(json.GetProperty("iconData").ValueKind, Is.EqualTo(JsonValueKind.Null)); //проверяем, что в JSON нет данных об иконке, так как мы не добавляли иконку при создании приложения
+
+        }
+
         private int GetInt(JsonElement root, string prop)
         {
             return root.GetProperty(prop).GetInt32();
@@ -85,20 +124,15 @@ namespace Selenium.Tests
             return element.GetString();
         }
 
-        private JsonElement GetJsonFromCurrentPage() //если страница — это JSON,то PageSource уже равен JSON
+        private JsonElement GetJsonFromCurrentPage()
         {
-            //ждём, пока страница загрузится и её исходный код начнётся с {, что означает начало JSON-объекта
-            WaitHelper.WaitUntil(Driver, d => d.PageSource.TrimStart().StartsWith("{"));
+            // Ждём JSON внутри <pre> и берём его текст
+            var pre = WaitHelper.WaitForElementVisible(Driver, By.TagName("pre")); // это HTML-элемент <pre>
+            var jsonText = pre.Text; // это текст внутри этого элемента, который должен быть JSON-строкой
 
-            // парсим весь PageSource как JSON
-            //Dispose освобождает ресурсы
-            //using вызывает Dispose автоматически
-            //JsonDocument, Stream, File, SqlConnection — IDisposable
-
-            using (var doc = JsonDocument.Parse(Driver.PageSource))
+            using (var doc = JsonDocument.Parse(jsonText))
             {
-                // возвращаем корневой элемент JSON, клонируя его, чтобы он не был связан с жизненным циклом документа
-                return doc.RootElement.Clone();
+              return doc.RootElement.Clone();
             }
 
         }
