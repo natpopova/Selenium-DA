@@ -19,7 +19,7 @@ namespace Selenium.Pages
         private readonly By _downloads = By.CssSelector("div.downloads");
 
         // Локаторы кнопок действий.
-        private readonly By _downloadButton = By.CssSelector("div.download-button a");
+        private readonly By _downloadButton = By.CssSelector("div.download-button a"); //a[normalize-space()='Download']
         private readonly By _deleteButton = By.CssSelector("div.edit-app-button a[href*='/delete']");
         private readonly By _editButton = By.CssSelector("div.edit-app-button a[href*='/edit']");
 

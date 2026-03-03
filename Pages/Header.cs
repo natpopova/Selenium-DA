@@ -19,26 +19,20 @@ namespace Selenium.Pages
         }
 
         // Элементы шапки.
-        public IWebElement WelcomeLabel { get { return Driver.FindElement(_welcomeLabel); } }
-        public IWebElement Title { get { return Driver.FindElement(_title); } }
-        public IWebElement NavAjax { get { return Driver.FindElement(_navAjax); } }
-        public IWebElement NavJs { get { return Driver.FindElement(_navJs); } }
-        public IWebElement NavMyApplications { get { return Driver.FindElement(_navMyApplications); } }
-        public IWebElement EditAccount { get { return Driver.FindElement(_editAccount); } }
-        public IWebElement HomeLink { get { return Driver.FindElement(_homeLink); } }
-        public IWebElement LogOutLink { get { return Driver.FindElement(_logOutLink); } }
+        public IWebElement WelcomeLabel => Driver.FindElement(_welcomeLabel);
+        public IWebElement Title => Driver.FindElement(_title);
+        public IWebElement NavAjax => Driver.FindElement(_navAjax);
+        public IWebElement NavJs => Driver.FindElement(_navJs);
+        public IWebElement NavMyApplications => Driver.FindElement(_navMyApplications);
+        public IWebElement EditAccount => Driver.FindElement(_editAccount);
+        public IWebElement HomeLink  => Driver.FindElement(_homeLink);
+        public IWebElement LogOutLink => Driver.FindElement(_logOutLink);
 
         // Свойство. Читаем приветствие пользователя.
-        public string GetWelcomeText
-        {
-            get { return WelcomeLabel.Text; }
-        }
+        public string GetWelcomeText => WelcomeLabel.Text;
 
         // Читаем заголовок в шапке.
-        public string GetTitleText
-        {
-            get { return Title.Text; }
-        }
+        public string GetTitleText => Title.Text;
 
         // Выходим из аккаунта и возвращаем страницу входа.
         public LoginPage Logout()

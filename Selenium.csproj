@@ -64,6 +64,7 @@
     <Compile Include="Tests\BaseTest.cs" />
     <Compile Include="Tests\LoginTests.cs" />
     <Compile Include="Tests\LogoutTests.cs" />
+    <Compile Include="Tests\ApplicationTests.cs" />
     <Compile Include="Tests\RegistrationTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -94,9 +95,6 @@
          При необходимости можно включить:
          <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
          (для net472 лучше не ставить v10.0.0, чтобы избежать GAC-ошибок) -->
-    <PackageReference Include="WebDriverManager">
-      <Version>2.17.6</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
