@@ -76,7 +76,7 @@ namespace Selenium.Pages
         }
 
         // Полный пошаговый сценарий заполнения формы.
-        public void FillNewApplicationForm(string title, string description, string category, string imagePath= null, string iconPath= null)
+        public void FillNewApplicationForm(string title, string description, string category, string imagePath = null, string iconPath = null)
         {
             EnterTitle(title);
             EnterDescription(description);

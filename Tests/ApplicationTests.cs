@@ -70,7 +70,7 @@ namespace Selenium.Tests
         public void Create_New_App_Without_Images()
         //Create a new application without images. Verify that it is displayed correctly and can be downloaded.
         {  
-            var title = "New Test App " + Guid.NewGuid(); //генерируем уникальное имя для приложения, чтобы не было конфликтов при повторных запусках теста
+            var title = "New Test App " + Guid.NewGuid();
             var description = "New app without images";
             var category = "Information";
 
@@ -107,6 +107,84 @@ namespace Selenium.Tests
             Assert.That(GetString(json, "category", "title"), Is.EqualTo(category));
             Assert.That(json.GetProperty("imageData").ValueKind, Is.EqualTo(JsonValueKind.Null)); //проверяем, что в JSON нет данных об изображении, так как мы не добавляли изображения при создании приложения
             Assert.That(json.GetProperty("iconData").ValueKind, Is.EqualTo(JsonValueKind.Null)); //проверяем, что в JSON нет данных об иконке, так как мы не добавляли иконку при создании приложения
+
+        }
+
+        [Test]
+        public void Create_New_App_With_Images()
+        {
+            var title = "New Test App" + Guid.NewGuid();
+            var description = "New app with images";
+            var category = "Information";
+
+            var imagePath = GetTestDataPath("Image jpeg.jpg");
+            var iconPath = GetTestDataPath("icon image.jpg");
+
+            //var imagePath = "C:\\Users\\npopova\\Downloads\\SeleniumProject\\Selenium\\Tests\\TestData\\Image jpeg.jpg";
+            //var iconPath = "C:\\Users\npopova\\Downloads\\SeleniumProject\\Selenium\\Tests\\TestData\\icon image.jpg";
+
+            var myApplicationPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            var newApplicationPage = myApplicationPage.OpenNewApplicationForm();
+
+            newApplicationPage.FillNewApplicationForm(title, description, category, imagePath, iconPath);
+
+            newApplicationPage.ClickCreateButton();
+
+            var myAppAfterCreate = new MyApplicationsPage(Driver);
+            var createAppCard = myAppAfterCreate.FindAppCardByName(title);
+            Assert.That(createAppCard, Is.Not.Null);
+
+            myAppAfterCreate.OpenAppDetailsByName(title);
+
+            var card = new ApplicationCard(Driver);
+            Assert.That(card.GetAppName, Is.EqualTo(title));
+            Assert.That(card.GetDescription, Is.EqualTo(description));
+            Assert.That(card.GetCategory, Is.EqualTo(category));
+
+        }
+
+        private string GetTestDataPath(string fileName)
+        {
+            var filePath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Tests", "TestData", fileName);
+            Assert.That(File.Exists(filePath), Is.True, $"Test data file not found: {filePath}");
+            return filePath;
+        }
+
+
+        [Test]
+        //Edit an application without images, and verify that the changes were applied.
+        public void Edite_App_Without_Images()
+        {
+            var title = "New Test App " + Guid.NewGuid();
+            var description = "New app without images";
+            var category = "Information";
+
+            var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+
+            var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
+
+            newApplicationPage.EnterTitle(title);
+            newApplicationPage.EnterDescription(description);
+            newApplicationPage.SelectCategory(category);
+
+            newApplicationPage.ClickCreateButton();
+
+            // Повторно создаём объект страницы — EnsureLoaded выполнится
+            var myAppAfterCreate = new MyApplicationsPage(Driver);
+            // Ищем карточку
+            var createdAppCard = myAppAfterCreate.FindAppCardByName(title);
+            Assert.That(createdAppCard, Is.Not.Null);
+            // Открываем детали
+            myAppAfterCreate.OpenAppDetailsByName(title);
+
+            var card = new ApplicationCard(Driver);
+
+            card.Click_Edit_Button();
+
+
+            Assert.That(card.GetAppName(), Is.EqualTo(title));
+            Assert.That(GetTextAfterColon(card.GetDescription()), Is.EqualTo(description));
+            Assert.That(GetTextAfterColon(card.GetCategory()), Is.EqualTo(category));
 
         }
 

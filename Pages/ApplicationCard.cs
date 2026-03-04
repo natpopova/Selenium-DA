@@ -67,10 +67,11 @@ namespace Selenium.Pages
         }
 
         // Переходим к редактированию приложения.
-        public void Edit()
+        public EditApplicationsPage Click_Edit_Button()
         {
             Wait.Until(d => EditButton.Displayed && EditButton.Enabled);
             EditButton.Click();
+            return new EditApplicationsPage(Driver);
         }
 
         // Ставим оценку приложению и сохраняем.
