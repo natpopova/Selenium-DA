@@ -90,18 +90,13 @@ namespace Selenium.Tests
             Assert.That(appsPage.MyApplicationsLink, Is.Not.Null, "Developer should see 'My applications' link.");
 
             // Переходим в раздел "My applications".
-            appsPage.MyApplicationsLink.Click();
-            // Ждём перехода по URL.
-            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
+            appsPage.OpenMyApplications();
 
             // Инициализируем страницу "My applications".
             var myAppsPage = new MyApplicationsPage(Driver);
 
-            // Проверяем, что ссылка кликабельна (она должна быть у Developer)
-            WaitHelper.WaitForElementClickable(Driver, By.LinkText("Add new application"));
-
             // Переход на форму создания приложени
-            var newAppPage = myAppsPage.OpenNewApplicationForm();
+            myAppsPage.OpenNewApplicationForm();
 
             // Проверяем что форма действительно открыта, по наличию кнопки Create.
             WaitHelper.WaitForElementVisible(Driver, By.CssSelector("input[type='submit'][value='Create']"));

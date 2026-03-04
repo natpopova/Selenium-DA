@@ -35,12 +35,16 @@ namespace Selenium.Framework.Models
         public static UserModel GetRandom()
         {
             Random random = new Random();
+            var firstName = firstNames[random.Next(0, firstNames.Length)];
+            var lastName = lastNames[random.Next(0, lastNames.Length)];
+            var uniqueSuffix = Guid.NewGuid().ToString("N").Substring(0, 8);
+
             return new UserModel
             {
-                Login = firstNames[random.Next(0, firstNames.Length - 1)] + lastNames[random.Next(0, lastNames.Length - 1)],
+                Login = firstName + lastName + uniqueSuffix,
                 Password = Guid.NewGuid().ToString(),
-                FirstName = firstNames[random.Next(0, firstNames.Length - 1)],
-                LastName = lastNames[random.Next(0, lastNames.Length - 1)],
+                FirstName = firstName,
+                LastName = lastName
             };
 
         }

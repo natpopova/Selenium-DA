@@ -9,6 +9,7 @@ namespace Selenium.Pages
         // Локатор ссылки для добавления нового приложения.
         private readonly By _addNewApplicationLink = By.PartialLinkText("new");
         private readonly By _appDetailsLink = By.CssSelector("a[href*='/app?title=']");
+        private readonly By _appCardsContainer = By.CssSelector(".apps");
         private readonly By _appCards = By.CssSelector(".apps .app");
         private readonly By _appName = By.CssSelector(".name");
 
@@ -19,9 +20,10 @@ namespace Selenium.Pages
 
         private void EnsureMyAppsPageLoaded()
         {
-            // cтраница загрузилась, когда есть хотя бы 1 контейнер с карточкам
-            WaitHelper.WaitUntil(Driver, d=> d.Url.Contains("/my"));
-            WaitHelper.WaitForElementVisible(Driver, _appCards);
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
+            WaitHelper.WaitUntil(Driver, d =>
+                d.FindElements(_addNewApplicationLink).Count > 0 ||
+                d.FindElements(_appCardsContainer).Count > 0);
         }
 
         //// Возвращаем ссылку "Add new application".
