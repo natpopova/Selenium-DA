@@ -1,5 +1,6 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using System;
 
 namespace Selenium.Pages
 {
@@ -16,6 +17,12 @@ namespace Selenium.Pages
 
         public NewApplicationPage(IWebDriver driver) : base(driver)
         {
+            EnsurePageLoaded();
+        }
+
+        private void EnsurePageLoaded()
+        {
+            WaitHelper.WaitForElementVisible(Driver, _titleInput);
         }
 
         // Элементы формы.
@@ -30,8 +37,9 @@ namespace Selenium.Pages
         // Вводим название приложения.
         public void EnterTitle(string title)
         {
-            TitleInput.Clear();
-            TitleInput.SendKeys(title);
+            var input = WaitHelper.WaitForElementVisible(Driver, _titleInput);
+            input.Clear();
+            input.SendKeys(title);
         }
 
         // Вводим описание приложения.
@@ -61,18 +69,23 @@ namespace Selenium.Pages
         }
 
         // Отправляем форму создания приложения.
-        public void ClickCreateButton()
+        public MyApplicationsPage ClickCreateButton()
         {
             CreateButton.Click();
+            return new MyApplicationsPage(Driver);
         }
 
         // Полный пошаговый сценарий заполнения формы.
-        public void FillNewApplicationForm(string title, string description, string category, string imagePath, string iconPath)
+        public void FillNewApplicationForm(string title, string description, string category, string imagePath= null, string iconPath= null)
         {
             EnterTitle(title);
             EnterDescription(description);
             SelectCategory(category);
+
+            if (!string.IsNullOrEmpty(imagePath))
             UploadImage(imagePath);
+
+            if(!string.IsNullOrEmpty(iconPath))
             UploadIcon(iconPath);
         }
     }

@@ -75,29 +75,33 @@ namespace Selenium.Tests
             var category = "Information";
 
             var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            
             var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
 
-            WaitHelper.WaitForElementVisible(Driver, By.Name("title"));
             newApplicationPage.EnterTitle(title);
             newApplicationPage.EnterDescription(description);
             newApplicationPage.SelectCategory(category);
+            
             newApplicationPage.ClickCreateButton();
 
-            //ждём перенаправления на страницу NavigateToMyApplicationsPage после создания приложения
-            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/my"));
-            //на странице сортировка в алфавитном порядке, нужно найти по заголовку title
-            var appLink = WaitHelper.WaitForElementClickable(Driver, By.XPath($"//a[normalize-space()='{title}']"));
-            //провалиться в детали и проверить заголовок, описание, категорию и загрузку
-            appLink.Click();
+            // Повторно создаём объект страницы — EnsureLoaded выполнится
+            var myAppAfterCreate = new MyApplicationsPage(Driver);
+            // Ищем карточку
+            var createdAppCard = myAppAfterCreate.FindAppCardByName(title);
+            Assert.That(createdAppCard, Is.Not.Null);
+            // Открываем детали
+            myAppAfterCreate.OpenAppDetailsByName(title);
 
             var card = new ApplicationCard(Driver);
             Assert.That(card.GetAppName(), Is.EqualTo(title));
             Assert.That(GetTextAfterColon(card.GetDescription()), Is.EqualTo(description));
             Assert.That(GetTextAfterColon(card.GetCategory()), Is.EqualTo(category));
 
+            // Проверяем JSON
             card.Download();
 
             var json = GetJsonFromCurrentPage();
+
             Assert.That(GetString(json, "title"), Is.EqualTo(title));
             Assert.That(GetString(json, "description"), Is.EqualTo(description));
             Assert.That(GetString(json, "category", "title"), Is.EqualTo(category));

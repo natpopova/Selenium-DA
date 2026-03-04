@@ -96,18 +96,16 @@ namespace Selenium.Tests
 
             // Инициализируем страницу "My applications".
             var myAppsPage = new MyApplicationsPage(Driver);
-            // Проверяем наличие ссылки создания/загрузки нового приложения.
-            Assert.That(myAppsPage.AddNewApplicationLink.Displayed, "Developer should see upload/new app link.");
 
-            // Переходим на страницу создания приложения.
-            myAppsPage.AddNewApplicationLink.Click();
-            // Ждём URL новой страницы.
-            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/new"));
+            // Проверяем, что ссылка кликабельна (она должна быть у Developer)
+            WaitHelper.WaitForElementClickable(Driver, By.LinkText("Add new application"));
 
-            // Инициализируем страницу создания приложения.
-            var newAppPage = new NewApplicationPage(Driver);
-            // Проверяем, что форма доступна (есть кнопка Create).
-            Assert.That(newAppPage.CreateButton.Displayed, "Upload form should be available for developer.");
+            // Переход на форму создания приложени
+            var newAppPage = myAppsPage.OpenNewApplicationForm();
+
+            // Проверяем что форма действительно открыта, по наличию кнопки Create.
+            WaitHelper.WaitForElementVisible(Driver, By.CssSelector("input[type='submit'][value='Create']"));
+
         }
 
         // Сценарий: обычный пользователь видит приложения, но не может загружать новые.

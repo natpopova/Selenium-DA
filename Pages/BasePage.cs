@@ -37,7 +37,7 @@ namespace Selenium.Pages
             return new Header(Driver);
         }
 
-        public static class WaitHelper
+        public static class WaitHelper //вложеный класс ожидания
         {
             // Базовое явное ожидание: ждём, пока условие не станет true.
             public static void WaitUntil(IWebDriver driver, Func<IWebDriver, bool> condition, int timeoutSeconds = 10)
