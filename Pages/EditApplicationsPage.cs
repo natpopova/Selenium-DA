@@ -15,18 +15,17 @@ namespace Selenium.Pages
         private readonly By _imageUpload = By.Name("image");
         private readonly By _iconUpload = By.Name("icon");
         private readonly By _updateButton = By.CssSelector("input[type='submit'][value='Update']");
+        private readonly By _successUpdatedMessage = By.CssSelector("p.flash");
 
 
         public EditApplicationsPage(IWebDriver driver) : base(driver)
         {
-            EnsureMyAppsPageLoaded();
+            EnsureEditPageLoaded();
         }
 
-        private void EnsureMyAppsPageLoaded()
+        private void EnsureEditPageLoaded()
         {
-            WaitHelper.WaitForElementVisible(Driver, _pageHeader);
-            WaitHelper.WaitForElementVisible(Driver, _descriptionTextArea);
-            WaitHelper.WaitForElementVisible(Driver, _updateButton);
+            WaitHelper.WaitUntil(Driver, d=>d.Url.Contains("/edit"));
         }
 
         // Элементы формы.
@@ -37,6 +36,7 @@ namespace Selenium.Pages
         public IWebElement ImageUpload => Driver.FindElement(_imageUpload);
         public IWebElement IconUpload => Driver.FindElement(_iconUpload);
         public IWebElement UpdateButton => Driver.FindElement(_updateButton);
+        public IWebElement SuccessUpdatedMessage => Driver.FindElement(_successUpdatedMessage);
 
         // Методы взаимодействия с формой редактирования приложения
         public void EnterDescription(string description)
@@ -62,10 +62,18 @@ namespace Selenium.Pages
         }
 
         // Отправляем форму создания приложения.
-        public ApplicationCard ClickUpdateButton()
+        public EditApplicationsPage ClickUpdateButton()
         {
             UpdateButton.Click();
-            return new ApplicationCard(Driver);
+            WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/edit"));
+            WaitHelper.WaitForElementVisible(Driver, _successUpdatedMessage);
+            
+            return new EditApplicationsPage(Driver);
+        }
+
+        public string GetSuccessUpdatedMessage()
+        {
+            return SuccessUpdatedMessage.Text.Trim();
         }
 
         // Полный пошаговый сценарий заполнения формы редактирования.

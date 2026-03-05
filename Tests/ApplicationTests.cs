@@ -137,9 +137,9 @@ namespace Selenium.Tests
             myAppAfterCreate.OpenAppDetailsByName(title);
 
             var card = new ApplicationCard(Driver);
-            Assert.That(card.GetAppName, Is.EqualTo(title));
-            Assert.That(card.GetDescription, Is.EqualTo(description));
-            Assert.That(card.GetCategory, Is.EqualTo(category));
+            Assert.That(card.GetAppName(), Is.EqualTo(title));
+            Assert.That(GetTextAfterColon(card.GetDescription()), Is.EqualTo(description));
+            Assert.That(GetTextAfterColon(card.GetCategory()), Is.EqualTo(category));
 
         }
 
@@ -159,6 +159,9 @@ namespace Selenium.Tests
             var description = "New app without images";
             var category = "Information";
 
+            var updatedDescription = "Edited description";
+            var updatedCategory = "Fun";
+
             var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
 
             var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
@@ -166,7 +169,6 @@ namespace Selenium.Tests
             newApplicationPage.EnterTitle(title);
             newApplicationPage.EnterDescription(description);
             newApplicationPage.SelectCategory(category);
-
             newApplicationPage.ClickCreateButton();
 
             // Повторно создаём объект страницы — EnsureLoaded выполнится
@@ -178,13 +180,24 @@ namespace Selenium.Tests
             myAppAfterCreate.OpenAppDetailsByName(title);
 
             var card = new ApplicationCard(Driver);
+            var editPage = card.Click_Edit_Button();
 
-            card.Click_Edit_Button();
+                        
+            editPage.EnterDescription(updatedDescription);
+            editPage.SelectCategory(updatedCategory);
+            
+            var editPageAfterUpdate = editPage.ClickUpdateButton();
+            Assert.That(editPageAfterUpdate.GetSuccessUpdatedMessage(), Is.EqualTo("Application edited"));
 
+            var myAppAfterEdit = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            myAppAfterEdit.FindAppCardByName(title);
+            myAppAfterEdit.OpenAppDetailsByName(title);
 
-            Assert.That(card.GetAppName(), Is.EqualTo(title));
-            Assert.That(GetTextAfterColon(card.GetDescription()), Is.EqualTo(description));
-            Assert.That(GetTextAfterColon(card.GetCategory()), Is.EqualTo(category));
+            var updatedAppCard = new ApplicationCard(Driver);
+
+            Assert.That(updatedAppCard.GetAppName(), Is.EqualTo(title));
+            Assert.That(GetTextAfterColon(updatedAppCard.GetDescription()), Is.EqualTo(updatedDescription));
+            Assert.That(GetTextAfterColon(updatedAppCard.GetCategory()), Is.EqualTo(updatedCategory));
 
         }
 
