@@ -46,11 +46,23 @@ namespace Selenium.Pages
         public string WaitForResultTextContains(string expectedPart, int timeoutSec = 10)
         {
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(timeoutSec));
-            wait.Until(d =>
+            return wait.Until(d =>
             {
-                var resultElement = GetResultText();
-                return !string.IsNullOrWhiteSpace(resultElement) 
-                        && resultElement.IndexOf(expectedPart, StringComparison.OrdinalIgnoreCase) >= 0;
+                var resultText = GetResultText();
+                // Если текст отсутствует — продолжаем ждать
+                if (string.IsNullOrWhiteSpace(resultText))
+                {
+                    return null;
+                }
+
+                // Проверяем, содержит ли текст нужную подстроку
+                if (resultText.IndexOf(expectedPart, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return resultText; // условие выполнено → завершаем ожидание
+                }
+
+                return null; // подстрока не найдена → продолжаем ждать
+
             });
         }
 
