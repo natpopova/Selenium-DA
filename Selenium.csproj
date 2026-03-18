@@ -62,7 +62,9 @@
     <Compile Include="Pages\NewApplicationPage.cs" />
     <Compile Include="Pages\RegistrationPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Pages\AJAXPage.cs" />
     <Compile Include="Tests\BaseTest.cs" />
+    <Compile Include="Tests\AJAXTests.cs" />
     <Compile Include="Tests\LoginTests.cs" />
     <Compile Include="Tests\LogoutTests.cs" />
     <Compile Include="Tests\ApplicationTests.cs" />

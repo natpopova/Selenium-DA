@@ -10,6 +10,8 @@ namespace Selenium.Pages
         // Локаторы основных блоков страницы.
         private readonly By _welcome = By.CssSelector(".welcome");
         private readonly By _popularApps = By.CssSelector(".popular-container .popular-app");
+        private readonly By _popularAppName = By.CssSelector("popular-container .popular-app .name");
+        private readonly By _popularAppDetailsLink = By.CssSelector(".popular-container .popular-app a[href*='app?title=']");
         private readonly By _categoryLinks = By.CssSelector(".categories-ul li a");
         private readonly By _appsContainer = By.CssSelector(".apps-container");
         private readonly By _appCards = By.CssSelector(".apps .app");
@@ -89,13 +91,19 @@ namespace Selenium.Pages
         // Проверяем, есть ли категория с указанным названием.
         public bool HasCategory(string categoryName)
         {
-            return CategoryLinks.Any(link => link.Text.Trim().Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+            return CategoryLinks.Any(link => link
+            .Text
+            .Trim()
+            .Equals(categoryName, StringComparison.OrdinalIgnoreCase));
         }
 
         // Нажимаем на категорию по её тексту.
         public void OpenCategory(string categoryName)
         {
-            var categoryLink = CategoryLinks.FirstOrDefault(link => link.Text.Trim().Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+            var categoryLink = CategoryLinks.FirstOrDefault(link => link
+            .Text
+            .Trim()
+            .Equals(categoryName, StringComparison.OrdinalIgnoreCase));
 
             if (categoryLink == null)
             {
@@ -108,13 +116,21 @@ namespace Selenium.Pages
         // Проверяем наличие приложения по имени.
         public bool HasApplication(string appName)
         {
-            return AppCards.Any(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
+            return AppCards.Any(card => card
+            .FindElement(_appName)
+            .Text
+            .Trim()
+            .Equals(appName, StringComparison.OrdinalIgnoreCase));
         }
 
         // Открываем страницу деталей приложения.
         public void OpenApplicationDetails(string appName)
         {
-            var targetCard = AppCards.FirstOrDefault(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
+            var targetCard = AppCards.FirstOrDefault(card => card
+            .FindElement(_appName)
+            .Text
+            .Trim()
+            .Equals(appName, StringComparison.OrdinalIgnoreCase));
 
             if (targetCard == null)
             {
@@ -127,7 +143,11 @@ namespace Selenium.Pages
         // Возвращаем число скачиваний для конкретного приложения.
         public int GetDownloadsForApp(string appName)
         {
-            var targetCard = AppCards.FirstOrDefault(card => card.FindElement(_appName).Text.Trim().Equals(appName, StringComparison.OrdinalIgnoreCase));
+            var targetCard = AppCards.FirstOrDefault(card => card
+            .FindElement(_appName)
+            .Text
+            .Trim()
+            .Equals(appName, StringComparison.OrdinalIgnoreCase));
 
             if (targetCard == null)
             {
@@ -136,6 +156,31 @@ namespace Selenium.Pages
 
             var downloadsText = targetCard.FindElement(_appDownloads).Text.Trim();
             return ParseDownloads(downloadsText);
+        }
+
+        // Проверяем, есть ли приложение по имени в блоке популярных приложений.
+        public bool HasPopularApplication(string appName)
+        {
+            return PopularAppBlocks.Any(card => card
+            .FindElement(_popularAppName)
+            .Text
+            .Trim()
+            .Equals(appName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Открываем детали приложения из секции популярных приложений.
+        public void OpenPopularApplicationDetails(string appName)
+        {
+            var targetCard = PopularAppBlocks.FirstOrDefault(card => card
+            .FindElement(_popularAppName)
+            .Text
+            .Trim()
+            .Equals(appName, StringComparison.OrdinalIgnoreCase));
+            if (targetCard == null)
+            {
+                throw new NoSuchElementException("Популярное приложение '" + appName + "' не найдено.");
+            }
+            targetCard.FindElement(_popularAppDetailsLink).Click();
         }
 
         // Выполняем выход из аккаунта.

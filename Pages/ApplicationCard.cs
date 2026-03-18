@@ -64,6 +64,20 @@ namespace Selenium.Pages
         {
             Wait.Until(d => DeleteButton.Displayed && DeleteButton.Enabled);
             DeleteButton.Click();
+            AcceptAlertIfPresent();
+        }
+
+        private void AcceptAlertIfPresent()
+        {
+            try
+            {
+                Driver.SwitchTo().Alert().Accept();
+                return; // приняли алерт — выходим
+            }
+            catch (NoAlertPresentException)
+            {
+                // Если алерт не появился, просто продолжаем без ошибок.
+            }
         }
 
         // Переходим к редактированию приложения.

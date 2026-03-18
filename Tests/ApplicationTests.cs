@@ -201,6 +201,85 @@ namespace Selenium.Tests
 
         }
 
+        [Test]
+        //Create an application, and download it many times (5 or 10, for example).
+        //Verify that it has appeared in the most popular apps section, and if you click it, you will be taken to the details page of this application.
+        public void Popular_App_After_Multiple_Downloads()
+        {
+            var title = "New Test App " + Guid.NewGuid();
+            var description = "New app for popular test";
+            var category = "Information";
+            const int downloadCount = 5;
+
+            var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
+
+            newApplicationPage.EnterTitle(title);
+            newApplicationPage.EnterDescription(description);
+            newApplicationPage.SelectCategory(category);
+            newApplicationPage.ClickCreateButton();
+
+            var myAppAfterCreate = new MyApplicationsPage(Driver);// Переинициализируем страницу "My applications" после создания.
+            var createdAppCard = myAppAfterCreate.FindAppCardByName(title);
+            Assert.That(createdAppCard, Is.Not.Null);
+
+            myAppAfterCreate.OpenAppDetailsByName(title);
+
+            var detailsCard = new ApplicationCard(Driver);
+            for (int i = 0; i < downloadCount; i++)
+            {
+                detailsCard.Download();
+                GetJsonFromCurrentPage(); // просто чтобы подождать, пока страница загрузится после каждого скачивания
+                Driver.Navigate().Back();// Возвращаемся назад из JSON/страницы скачивания обратно в детали приложения
+                //OpenFirstAppDetails(); // возвращаемся на страницу деталей, чтобы скачать снова
+            }
+
+            SiteNavigator.NavigateToHomePage(Driver);
+
+            // Инициализируем Page Object страницы всех приложений.
+            var popularAppLink = WaitHelper.WaitForElementClickable(Driver, By.CssSelector(".popular-container .popular-app a[href*='app?title=" + title + "']"));
+            Assert.That(popularAppLink, Is.Not.Null, "Приложение не появилось в разделе популярных");
+           
+            popularAppLink.Click();
+            WaitHelper.WaitForElementVisible(Driver, By.CssSelector("div.name"));
+            
+            var popularAppCard = new ApplicationCard(Driver);
+            Assert.That(popularAppCard.GetAppName(), Is.EqualTo(title));
+        }
+
+        [Test]
+        public void Delete_App_And_Verify_It_Is_Removed_From_Popular()
+        {
+            var title = "New Test App " + Guid.NewGuid();
+            var description = "New app for delete test";
+            var category = "Information";
+
+            var myApplicationsPage = SiteNavigator.NavigateToMyApplicationsPage(Driver);
+            var newApplicationPage = myApplicationsPage.OpenNewApplicationForm();
+
+            newApplicationPage.EnterTitle(title);
+            newApplicationPage.EnterDescription(description);
+            newApplicationPage.SelectCategory(category);
+            newApplicationPage.ClickCreateButton();
+            
+            var myAppAfterCreate = new MyApplicationsPage(Driver);
+            Assert.That(AppExistOnMyAppPage(title), Is.True, "Приложение отображается на странице 'My applications' после создания");
+
+            myAppAfterCreate.OpenAppDetailsByName(title);
+            
+            var appCard = new ApplicationCard(Driver);
+            appCard.Delete();
+
+            Assert.That(AppExistOnMyAppPage(title), Is.False, "Приложение не отображается на странице 'My applications' после удаления");
+
+        }
+
+        private bool AppExistOnMyAppPage(string appName)
+        {
+            var appCards = Driver.FindElements(By.CssSelector(".apps .app .name"));
+            return appCards.Any(card => card.Text.Trim().Equals(appName, StringComparison.Ordinal));
+        }
+
         private int GetInt(JsonElement root, string prop)
         {
             return root.GetProperty(prop).GetInt32();
@@ -231,7 +310,6 @@ namespace Selenium.Tests
             }
 
         }
-
         private static int ParseDownloads(string text)
         {
             var digits = new string(text.Where(char.IsDigit).ToArray()); //оставляет только цифры и превращает их в массив символов и собирает обратно в строку
@@ -257,12 +335,6 @@ namespace Selenium.Tests
             var link = WaitHelper.WaitForElementClickable(Driver, By.CssSelector("a[href='/app?title=Application Information 0']"));
             link.Click();
             WaitHelper.WaitForElementVisible(Driver, By.CssSelector("div.name"));
-        }
-
-        private void OpenAllAppsPage()
-        {
-            Driver.Navigate().GoToUrl(Settings.GetBaseUrl().TrimEnd('/')+ "/all");
-            WaitHelper.WaitForElementVisible(Driver, By.CssSelector(".apps"));
         }
     }
 
