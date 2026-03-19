@@ -71,6 +71,7 @@ namespace Selenium.Pages
             return Driver.FindElement(_result).Text.Trim();
         }
 
+
         public void EnsureLoaded()
         {
             WaitHelper.WaitForElementVisible(Driver, By.Id("x"));

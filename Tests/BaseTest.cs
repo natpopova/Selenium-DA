@@ -1,8 +1,10 @@
-using System;
 using log4net;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using OpenQA.Selenium;
 using Selenium.Framework;
+using System;
+using System.IO;
 
 namespace Selenium.Tests
 {
@@ -30,6 +32,8 @@ namespace Selenium.Tests
         [TearDown]
         public virtual void Cleanup()
         {
+            SaveScreenshotOnFailure();
+
             // Всегда закрываем браузер после теста, чтобы не копить процессы.
             try
             {
@@ -39,6 +43,39 @@ namespace Selenium.Tests
             {
                 Driver?.Dispose();
             }
+        }
+
+        public void SaveScreenshotOnFailure()
+        {
+            if (Driver == null || TestContext.CurrentContext.Result.Outcome.Status != TestStatus.Failed)
+            {
+                return;
+            }
+
+            if (!(Driver is ITakesScreenshot screenshotDriver))
+            {
+                return;
+            }
+
+            var screenshotsDirectory = Path.Combine(TestContext.CurrentContext.WorkDirectory, "Screenshots");
+            Directory.CreateDirectory(screenshotsDirectory);
+
+            var fileName = $"{GetSafeTestName()}_{DateTime.UtcNow:yyyyMMdd_HHmmss}.png";
+            var screenshotPath = Path.Combine(screenshotsDirectory, fileName);
+
+            screenshotDriver.GetScreenshot().SaveAsFile(screenshotPath);
+            TestContext.AddTestAttachment(screenshotPath, "Failure screenshot");
+        }
+
+        private static string GetSafeTestName()
+        {
+            var testName = TestContext.CurrentContext.Test.Name;
+            foreach (var invalidCharacter in Path.GetInvalidFileNameChars())
+            {
+                testName = testName.Replace(invalidCharacter, '_');
+            }
+
+            return testName;
         }
     }
 }

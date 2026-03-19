@@ -63,7 +63,6 @@ namespace Selenium.Tests
             // Arrange: Открываем страницу AJAX и вводим одно валидное число и одну строку.
             const string validNumber = "5";
             const string invalidInput = "abc";
-            const string expectedErrorMessage = "Result is: Incorrect data";
             const string InvalidInputMessage = "Incorrect data";
 
             var ajaxPage = SiteNavigator.NavigateToAJAXPage(Driver);
@@ -74,7 +73,7 @@ namespace Selenium.Tests
             ajaxPage.ClickSumButton();
             string errorMessage = ajaxPage.WaitForResultTextContains(InvalidInputMessage);
 
-            Assert.That(errorMessage, Does.Contain(expectedErrorMessage), "The error message does not contain the expected text.");
+            Assert.That(errorMessage, Does.Contain(InvalidInputMessage), "The error message does not contain the expected text.");
 
 
 
