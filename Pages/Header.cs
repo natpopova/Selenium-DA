@@ -1,4 +1,5 @@
 using OpenQA.Selenium;
+using Selenium.Tests;
 
 namespace Selenium.Pages
 {
@@ -49,15 +50,17 @@ namespace Selenium.Pages
         }
 
         // Переходим на страницу Ajax теста.
-        public void GoToAjaxPage()
+        public AJAXPage GoToAjaxPage()
         {
             NavAjax.Click();
+            return new AJAXPage(Driver);
         }
 
         // Переходим на страницу JavaScript теста.
-        public void GoToJsPage()
+        public JSPage GoToJsPage()
         {
             NavJs.Click();
+            return new JSPage(Driver);
         }
 
         // Переходим на главную.

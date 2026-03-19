@@ -47,5 +47,11 @@ namespace Selenium.Framework
             driver.Navigate().GoToUrl(BuildUrl("/calc"));
             return new AJAXPage(driver);
         }
+
+        public static JSPage NavigateToJSPage(IWebDriver driver)
+        {
+            driver.Navigate().GoToUrl(BuildUrl("/js"));
+            return new JSPage(driver);
+        }
     }
 }

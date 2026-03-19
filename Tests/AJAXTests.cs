@@ -23,7 +23,7 @@ namespace Selenium.Tests
         [SetUp]
 
         // Для AJAX-текста используем только explicit wait.
-        public void AJAXSetUp()
+        public void AJAXTestSetUp()
         {
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.Zero;
 

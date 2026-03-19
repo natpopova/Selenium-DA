@@ -51,6 +51,7 @@
     <Compile Include="Framework\Models\UserModel.cs" />
     <Compile Include="Framework\Settings.cs" />
     <Compile Include="Framework\SiteNavigator.cs" />
+    <Compile Include="Pages\JSPage.cs" />
     <Compile Include="Pages\ApplicationCard.cs" />
     <Compile Include="Pages\ApplicationsPage.cs" />
     <Compile Include="Pages\BasePage.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Pages\RegistrationPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Pages\AJAXPage.cs" />
+    <Compile Include="Tests\JSTests.cs" />
     <Compile Include="Tests\BaseTest.cs" />
     <Compile Include="Tests\AJAXTests.cs" />
     <Compile Include="Tests\LoginTests.cs" />
