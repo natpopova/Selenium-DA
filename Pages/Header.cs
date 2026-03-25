@@ -63,22 +63,5 @@ namespace Selenium.Pages
             return new JSPage(Driver);
         }
 
-        // Переходим на главную.
-        public void GoToHomePage()
-        {
-            HomeLink.Click();
-        }
-
-        // Открываем редактирование аккаунта.
-        public void EditUserAccount()
-        {
-            EditAccount.Click();
-        }
-
-        // Альтернативный метод выхода без возврата нового объекта.
-        public void LogoutUser()
-        {
-            LogOutLink.Click();
-        }
     }
 }

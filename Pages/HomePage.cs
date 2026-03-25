@@ -21,7 +21,7 @@ namespace Selenium.Pages
 
 
         // Выходим из аккаунта и возвращаем страницу логина.
-        public LoginPage Logout(UserModel user)
+        public LoginPage Logout()
         {
             // Параметр user оставлен для совместимости со старыми тестами.
             LogoutLink.Click();

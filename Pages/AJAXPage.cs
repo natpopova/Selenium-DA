@@ -68,7 +68,13 @@ namespace Selenium.Pages
 
         public string GetResultText()
         {
-            return Driver.FindElement(_result).Text.Trim();
+            //return Driver.FindElement(_result).Text.Trim();
+            var resultElement = Driver.FindElements(_result);
+            if (resultElement.Count==0)
+            {
+                return string.Empty;
+            }
+            return resultElement[0].Text.Trim();
         }
 
 

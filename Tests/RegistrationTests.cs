@@ -175,7 +175,6 @@ namespace Selenium.Tests
             Assert.That(File.Exists(csvPath), Is.True, $"Test data file not found: {csvPath}");
 
             var users = new List<UserModelExtended>();
-            var lines = File.ReadAllLines(csvPath);
 
             // Начинаем с 1, потому что нулевая строка — это header.
             foreach (var line in File.ReadLines(csvPath).Skip(1))

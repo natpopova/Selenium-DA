@@ -43,7 +43,7 @@ namespace Selenium.Tests
             // Открываем новую вкладку браузера и автоматически переключаемся в неё.
             Driver.SwitchTo().NewWindow(WindowType.Tab);
             // На второй вкладке идём на Home и выполняем logout.
-            SiteNavigator.NavigateToHomePage(Driver).Logout(user);
+            SiteNavigator.NavigateToHomePage(Driver).Logout();
             // Ждём переход на страницу логина после выхода.
             WaitHelper.WaitUntil(Driver, d => d.Url.Contains("/login"));
 
