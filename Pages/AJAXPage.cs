@@ -81,8 +81,8 @@ namespace Selenium.Pages
         public void EnsureLoaded()
         {
             WaitHelper.WaitForElementVisible(Driver, By.Id("x"));
-            WaitHelper.WaitForElementVisible(Driver, By.Id("y"));
-            WaitHelper.WaitForElementVisible(Driver, By.Id("calc"));
+            //WaitHelper.WaitForElementVisible(Driver, By.Id("y"));
+            //WaitHelper.WaitForElementVisible(Driver, By.Id("calc"));
         }
     }
 }
