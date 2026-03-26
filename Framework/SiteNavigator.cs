@@ -13,6 +13,12 @@ namespace Selenium.Framework
             return new LoginPage(driver);
         }
 
+        public static LoginPage NavigateToLoginPageWithBasicAuth(IWebDriver driver)
+        {
+            driver.Navigate().GoToUrl(Settings.BuildBasicAuthUrl("/auth/login"));
+            return new LoginPage(driver);
+        }
+
         public static HomePage NavigateToHomePage(IWebDriver driver)
         {
             driver.Navigate().GoToUrl(Settings.BuildUrl(""));

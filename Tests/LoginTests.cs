@@ -38,13 +38,13 @@ namespace Selenium.Tests
         // Тест: вход валидным пользователем.
         [Test] //Это NUnit-атрибут, который помечает метод как тестовый кейс для выполнения тест-раннером.
         
-        public void Login_As_Valid_User() //Публичный метод без возвращаемого значения, представляющий тест-сценарий “логин валидным пользователем”.
+        public void Login_As_Valid_User_Through_Basic_Authentication_Url() //Публичный метод без возвращаемого значения, представляющий тест-сценарий “логин валидным пользователем”.
         {
             // Переходим на страницу логина и выполняем вход, получая объект домашней страницы.
-            var homePage = SiteNavigator.NavigateToLoginPage(Driver).Login(user);
+            var homePage = SiteNavigator.NavigateToLoginPageWithBasicAuth(Driver).Login(user);
 
             // Пишем инф сообщение в лог.
-            Logger.Info("Assert user login");
+            Logger.Info("Assert user login via basic auth url");
             // Ждём, пока в приветствии появится имя пользователя. вспомогательный метод
             WaitHelper.WaitUntil(Driver, d => homePage.OnHeader().GetWelcomeText.Contains(user.FirstName));
             // Проверяем, что приветствие действительно содержит имя.

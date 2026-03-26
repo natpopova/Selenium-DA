@@ -43,6 +43,7 @@ namespace Selenium.Tests
             {
                 Driver?.Dispose();
             }
+            Logger.Info("Test ended");
         }
 
         public void SaveScreenshotOnFailure()

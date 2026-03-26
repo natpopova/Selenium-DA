@@ -16,6 +16,11 @@ namespace Selenium.Framework
             return ConfigurationManager.AppSettings["baseUrl"];
         }
 
+        public static string GetBasicAuthBaseUrl()
+        {
+            return ConfigurationManager.AppSettings["basicAuthBaseUrl"];
+        }
+
         //читают из appSettings значения для Basic Auth username/password
         public static string GetBasicAuthUsername()
         {
@@ -28,12 +33,20 @@ namespace Selenium.Framework
         }
 
 
-        // Собираем абсолютный URL
-        //http://username:password@selenium-courses.ipa.dataart.net:8081/
+        // Собираем абсолютный URL для обычного стенда (без embedded credentials в URL).
 
         public static string BuildUrl(string relativePath = "")
         {
             var baseUri = new Uri(GetBaseUrl().TrimEnd('/') + "/");
+            var targetUri = new Uri(baseUri, relativePath.TrimStart('/'));
+            return targetUri.ToString();
+        }
+
+        // Собираем абсолютный URL для Basic Auth стенда.
+        // Пример: http://username:password@selenium-courses.ipa.dataart.net:8081/auth/login
+        public static string BuildBasicAuthUrl(string relativePath = "")
+        {
+            var baseUri = new Uri(GetBasicAuthBaseUrl().TrimEnd('/') + "/");
             var targetUri = new Uri(baseUri, relativePath.TrimStart('/'));
 
             var username = GetBasicAuthUsername();
