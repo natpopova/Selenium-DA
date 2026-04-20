@@ -38,7 +38,7 @@ namespace Selenium.Tests
 
         public void AJAX_Sum_ValidInput_ShouldReturnCorrectResult()
         {
-            // Arrange: Открываем страницу AJAX и вводим два валидных числа.
+            // Arrange: Открываем страницу AJAX и вводим два валидных числа..
             const string firstNumber = "7";
             const string secondNumber = "1";
             const string expectedResult = "8";
@@ -60,7 +60,7 @@ namespace Selenium.Tests
         //Enter one valid number and one string (not a number), click ‘Sum’, wait for the result, and verify that the message ‘Incorrect data’ appears.
         public void AJAX_Sum_InvalidInput_ShouldShowErrorMessage()
         {
-            // Arrange: Открываем страницу AJAX и вводим одно валидное число и одну строку.
+            // Arrange: Открываем страницу AJAX и вводим одно валидное число и одну строку.11
             const string validNumber = "5";
             const string invalidInput = "abc";
             const string InvalidInputMessage = "Incorrect data";
